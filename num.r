@@ -9,7 +9,8 @@ slots = c(
   tiempo_en_transmision="numeric",
   tiempo_C1="numeric",
   tiempo_Cx="numeric",
-  num_total_devuelto="numeric")
+  num_total_devuelto="numeric"
+  en_cola="logical")
 )
 
 setClass("Procesador",
