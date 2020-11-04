@@ -155,11 +155,6 @@ llega_a_C1_de_C2 <- function() {
 
 #evento numero 8
 llega_a_C1_de_C3 <- function() {
-  if no ocupado?
-			PC1 procesó = reloj+D6
-			PC1 ocupado = true
-		else
-			agregar a cola
   if(!C1_ocupado)
   {
      C1_ocupado = TRUE
