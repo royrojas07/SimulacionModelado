@@ -1,0 +1,19 @@
+Nombres o hileras:
+- Palabras distintas separadas por guión bajo
+- Mejor no iniciar nombres con números, sino con letras
+
+-> En vez de espacios en blanco, coloque NA
+
+Se entra a R con
+$ R
+"R" mayúscula, no "r" minúscula
+
+Si está teniendo problemas con nombres de archivo y no le está agarrando los datos, "limpie" las variables y funciones. https://www.datacamp.com/community/tutorials/r-data-import-tutorial
+You might have an environment that is still filled with data and values, which you can all delete using the following line of code:
+rm(list=ls())
+The rm() function allows you to “remove objects from a specified environment”. In this case, you specify that you want to consider a list for this function, which is the outcome of the ls() function.
+
+Si no encuentra el archivo, asegúrese que está trabajando en la misma carpeta o pase toda las dirección del archivo al abrirlo
+getwd()		Para ver en qué directorio estoy
+And you might consider changing the path that you get as a result of this function, maybe to the folder in which you have stored your data set:
+setwd("<location of your dataset>")
