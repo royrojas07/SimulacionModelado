@@ -1,0 +1,6 @@
+nombre_distribucion,media,varianza,a,b,param_lambda,k,x
+normal_metodo_directo,5,0.2,NA,NA,NA,NA,NA
+normal_TLC,7,0.9,NA,NA,NA,NA,NA
+uniforme,NA,NA,5,20,NA,NA,NA
+exponencial,NA,NA,NA,NA,8,NA,NA
+func_densidad,NA,NA,NA,NA,NA,9/5,(1/2)
