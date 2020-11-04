@@ -76,6 +76,7 @@ cola_de_eventos <- PriorityQueue()
 cola_msj_C1 <- Queue()
 cola_msj_C2 <- Queue()
 cola_msj_C3 <- Queue()
+cola_trans_C1_a_C3 <- Queue()
 
 C1_ocupado = "logical"
 C2_N1_ocupado = "logical"
@@ -146,6 +147,23 @@ devuelto_a_C2 <- function() {
 #evento #6
 devuelto_a_C3 <- function() {
   #Roy
+  mensaje = cola_trans_C1_a_C3$pop()
+  mensaje@tiempo_en_transmision += 3
+  if( !C3_ocupado ) # se empieza a procesar mensaje
+  {
+    # se programa evento C3_termina
+    cola_de_eventos$insert( reloj + D5, "4" )
+    C3_ocupado = TRUE
+    mensaje@tiempo_Cx += D5
+    # aca igual habria que agregar a la cola tal vez con una bandera?
+    mensaje@en_cola = FALSE
+  }
+  else # esta ocupado
+  {
+    mensaje@llegada_a_cola = reloj
+    mensaje@en_cola = TRUE
+  }
+  cola_msj_C3$insert( mensaje )
 }
 
 #evento numero 7
@@ -185,6 +203,3 @@ matching <- function(id)
 mensaje1 <- new("mensaje",ID=1,origen=2)
 
 print(mensaje1@origen)
-
-
-
