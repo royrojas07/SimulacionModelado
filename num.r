@@ -19,12 +19,47 @@ setClass("Procesador",
   )
 )
 
+#estructura de datos cola de prioridad para usar en los eventos 
+PriorityQueue <- function() {
+  keys <<- values <<- NULL
+  insert <- function(key, value) {
+    temp <- c(keys, key)
+    ord <- order(temp)
+    keys <<- temp[ord]
+    values <<- c(values, list(value))[ord]
+  }
+  pop <- function() {
+    head <- values[[1]]
+    values <<- values[-1]
+    keys <<- keys[-1]
+    return(head)
+  }
+  empty <- function() length(keys) == 0
+  list(insert = insert, pop = pop, empty = empty)
+}
+
+#estructura de datos cola para guardar los mensajes de cada computadora, igualmente los rechazados y los aceptados
+Queue <- function() {
+  values <- NULL
+  insert <- function(value) {
+    values <<- c(values, list(value))
+  }
+  pop <- function() {
+    head <- values[[1]]
+    values <<- values[-1]
+    return(head)
+  }
+  empty <- function() length(values) == 0
+  list(insert = insert, pop = pop, empty = empty)
+}
+
+
 
 #lectura del archivo de texto
 
 
 #    Colas     #
-# Prioridad de eventos
+
 # Rechazados
 # Aceptados
 # Cola de mensajes por Computadora
@@ -37,52 +72,121 @@ setClass("Procesador",
 # mensajes rechazados total 
 # Numero de veces msj devueltos
 
+cola_de_eventos <- PriorityQueue()
+cola_msj_C1 <- Queue()
+cola_msj_C2 <- Queue()
+cola_msj_C3 <- Queue()
+
 C1_ocupado = "logical"
 C2_N1_ocupado = "logical"
 C2_N2_ocupado = "logical"
 C3_ocupado = "logical"
-
+reloj = 0
 
 simular <- function() {
   
 }
 
+#evento numero 0
 arr_a_C2 <- function() {
   #Aurelio
 }
 
+#evento numero 1
 arr_a_C3 <- function() {
   #Roy
 }
 
+#evento numero 2
 C1_termina <- function() {
   #Aurelio
 }
 
+#evento numero 3
 C2_termina <- function() {
-  #Carlos
+  cola_de_eventos$insert(reloj+20,7)
+  if(!cola_msj_C2$empty() & C2_N1_ocupado)
+  {
+    C2_N1_ocupado = TRUE
+    cola_de_eventos$insert(reloj+D2,"3")
+  }
+	ifelse(!cola_msj_C2$empty() & C2_N2_ocupado) #esto no seria un if?
+		C2_N2_ocupado = TRUE
+		cola_de_eventos$insert(reloj+D3,"3")
+  }
 }
 
+#evento numero 4
 C3_termina <- function() {
   #Roy
 }
 
+#evento numero 5
 devuelto_a_C2 <- function() {
   #Carlos
+  if(!C2_N1_ocupado | !C2_N2_ocupado)
+  {
+    if(!C2_N1_ocupado)
+    {
+      C2_N1_ocupado = TRUE
+      cola_de_eventos$insert(reloj+D2,"3")
+    }
+    else 
+    {
+      C2_N2_ocupado = TRUE
+		  cola_de_eventos$insert(reloj+D3,"3")   
+    }
+  }
+  else 
+  {
+     cola_msj_C2("nuevo msj")
+  }
 }
 
+#evento #6
 devuelto_a_C3 <- function() {
   #Roy
 }
 
+#evento numero 7
 llega_a_C1_de_C2 <- function() {
   #Aurelio
 }
 
+#evento numero 8
 llega_a_C1_de_C3 <- function() {
-  #Carlos
+  if no ocupado?
+			PC1 procesó = reloj+D6
+			PC1 ocupado = true
+		else
+			agregar a cola
+  if(!C1_ocupado)
+  {
+     C1_ocupado = TRUE
+     cola_de_eventos$insert(reloj+D6,"2")  
+  }
+  else 
+  {
+    cola_msj_C1$insert("nuevo mensaje")
+  }
 }
 
+#funcion encargada de asociar el respectivo id con la funcion correspondiente
+matching <- function(id) 
+{
+  switch(id,
+        "0" = arr_a_C2(),
+        "1" = arr_a_C3(),
+        "2" = C1_termina(),
+        "3" = C2_termina(),
+        "4" = C3_termina(),
+        "5" = devuelto_a_C2(),
+        "6" = devuelto_a_C3(),
+        "7" = llega_a_C1_de_C2(),
+        "8" = llega_a_C1_de_C3())
+}
+
+#Ejemplo de usar las estructuras
 mensaje1 <- new("mensaje",ID=1,origen=2)
 
 print(mensaje1@origen)
