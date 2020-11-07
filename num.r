@@ -76,10 +76,17 @@ Queue <- function() {
 # Numero de veces msj devueltos
 
 cola_de_eventos <- PriorityQueue()
+
+#colas de mensajes
 cola_msj_C1 <- Queue()
 cola_msj_C2 <- Queue()
 cola_msj_C3 <- Queue()
+
+#colas transmision
+cola_trans_C1_a_C2 <- Queue()
 cola_trans_C1_a_C3 <- Queue()
+cola_trans_C2_a_C1 <- Queue()
+cola_trans_C3_a_C1 <- Queue()
 
 C1_ocupado = "logical"
 C2_N1_ocupado = "logical"
@@ -88,6 +95,16 @@ C3_ocupado = "logical"
 reloj = 0
 
 simular <- function() {
+  count <- 1
+  for(1 in c(1:10)) #el 10 indica cuantas veces quiero que se repita las simulaciones
+  { 
+    t <- Sys.time()
+    period <- 30 #cuantos segundos se quiere la simulacion
+    while (difftime(Sys.time(), t, units = "secs")[[1]] < period)
+    {
+
+    }
+  }
   
 }
 
@@ -108,13 +125,17 @@ C1_termina <- function() {
 
 #evento numero 3
 C2_termina <- function() {
-  cola_de_eventos$insert(reloj+20,7)
+  #Carlos
+  cola_de_eventos$insert(reloj+20,"7")
+  mensaje <- cola_msj_C2$pop() #DEBERIA PREGUNTA POR EL BOOL EN_COLA
+                                #ToDo: Hacer diferencia de tiempos para colas
+  cola_trans_C2_a_C1$insert(mensaje)
   if(!cola_msj_C2$empty() & C2_N1_ocupado)
   {
-    C2_N1_ocupado = TRUE
+    C2_N1_ocupado = TRUE 
     cola_de_eventos$insert(reloj+D2,"3")
   }
-	ifelse(!cola_msj_C2$empty() & C2_N2_ocupado) #esto no seria un if?
+	ifelse(!cola_msj_C2$empty() & C2_N2_ocupado) 
 		C2_N2_ocupado = TRUE
 		cola_de_eventos$insert(reloj+D3,"3")
   }
@@ -128,22 +149,32 @@ C3_termina <- function() {
 #evento numero 5
 devuelto_a_C2 <- function() {
   #Carlos
+  mensaje = cola_trans_C1_a_C2$pop()
+  mensaje@tiempo_en_transmision += 3
   if(!C2_N1_ocupado | !C2_N2_ocupado)
   {
     if(!C2_N1_ocupado)
     {
       C2_N1_ocupado = TRUE
       cola_de_eventos$insert(reloj+D2,"3")
+      mensaje$tiempo_Cx <- D2
+      cola_msj_C2(mensaje)
+      mensaje$en_cola = FALSE
     }
     else 
     {
-      C2_N2_ocupado = TRUE
+      C2_N2_ocupado <- TRUE
 		  cola_de_eventos$insert(reloj+D3,"3")   
+      mensaje$tiempo_Cx <- D3 #tiempo que dura procesandose
+      cola_msj_C2(mensaje)
+      mensaje$en_cola = FALSE
     }
   }
   else 
   {
-     cola_msj_C2("nuevo msj")
+     cola_msj_C2(mensaje)
+     mensaje$tiempo_en_cola <- Sys.time() #Se empieza a tomar el tiempo en cola
+     mensaje$en_cola = TRUE
   }
 }
 
@@ -176,14 +207,22 @@ llega_a_C1_de_C2 <- function() {
 
 #evento numero 8
 llega_a_C1_de_C3 <- function() {
+  #Carlos
+  mensaje = cola_trans_C3_a_C1$pop()
+  mensaje@tiempo_en_transmision += 20
   if(!C1_ocupado)
   {
-     C1_ocupado = TRUE
-     cola_de_eventos$insert(reloj+D6,"2")  
+     C1_ocupado <- TRUE
+     cola_de_eventos$insert(reloj+D6,"2")
+     mensaje$tiempo_C1 <- D6 #Tiempo que duraria procesandose
+     cola_msj_C1$insert(mensaje)
+     mensaje$en_cola <- FALSE
   }
   else 
   {
-    cola_msj_C1$insert("nuevo mensaje")
+    cola_msj_C1$insert(mensaje) 
+    mensaje$tiempo_en_cola <- Sys.time() #Se empieza a tomar el tiempo en cola
+    mensaje$en_cola <- TRUE
   }
 }
 
