@@ -9,7 +9,7 @@ slots = c(
   tiempo_en_transmision="numeric",
   tiempo_C1="numeric",
   tiempo_Cx="numeric",
-  num_total_devuelto="numeric"
+  num_total_devuelto="numeric",
   en_cola="logical")
 )
 
@@ -178,7 +178,7 @@ C2_termina <- function() {
     C2_N1_ocupado = TRUE
     cola_de_eventos$insert(reloj+D2,"3")
   }
-	ifelse(!cola_msj_C2$empty() & C2_N2_ocupado) #esto no seria un if?
+	ifelse(!cola_msj_C2$empty() & C2_N2_ocupado){ #esto no seria un if?
 		C2_N2_ocupado = TRUE
 		cola_de_eventos$insert(reloj+D3,"3")
   }
