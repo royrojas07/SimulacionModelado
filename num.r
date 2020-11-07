@@ -21,6 +21,7 @@ setClass("Procesador",
 )
 
 #estructura de datos cola de prioridad para usar en los eventos 
+
 PriorityQueue <- function() {
   keys <<- values <<- NULL
   insert <- function(key, value) {
@@ -87,7 +88,8 @@ cola_trans_C1_a_C2 <- Queue()
 cola_trans_C1_a_C3 <- Queue()
 cola_trans_C2_a_C1 <- Queue()
 cola_trans_C3_a_C1 <- Queue()
-# cola_msj_destino <- Queue()
+cola_msj_destino <- Queue()
+cola_msj_rechazados <- Queue()
 # x1  # probabilidad x1, msj devuelto a PC2
 # x3  # probabilidad x3, msj devuelto a PC3
 
@@ -96,17 +98,20 @@ C2_N1_ocupado = "logical"
 C2_N2_ocupado = "logical"
 C3_ocupado = "logical"
 reloj = 0
+msj_ID <- 0
 
 simular <- function() {
   count <- 1
   for(1 in c(1:10)) #el 10 indica cuantas veces quiero que se repita las simulaciones
   { 
-    t <- Sys.time()
+    #t <- Sys.time()
     period <- 30 #cuantos segundos se quiere la simulacion
-    while (difftime(Sys.time(), t, units = "secs")[[1]] < period)
-    {
+    #while (difftime(Sys.time(), t, units = "secs")[[1]] < period)
+    #{
 
-    }
+    #}
+    msj_ID <- 0
+    reloj = 0
   }
   
 }
@@ -114,7 +119,8 @@ simular <- function() {
 #evento numero 0
 arr_a_C2 <- function() {
   # #Aurelio
-  # # crear mensaje m # lo creamos aquí o desde afuera? Piendo que mejor aquí
+  # Crear adentro # crear mensaje m # lo creamos aquí o desde afuera? Piendo que mejor aquí
+  mensaje 
   # # ID=msj_id, PC_origen= 2, tiempo_en_cola=0, llegada_a_cola=0, tiempo_en_transmision=0, tiempo_C1=0  tiempo_Cx=0, num_total_devuelto=0, en_cola=false)
   # # msj@ID = msj_id
   # # contador de id mensajes + 1
@@ -131,7 +137,7 @@ arr_a_C2 <- function() {
   # }
   # else{ # si núcleos ocupados, a la cola
   #   cola_msj_C2()$insert(msj) #? verificar si el mensaje se inserta de esta manera
-  #   #? sumar aquí tiempo en cola
+  #   #? sumar aquí tiempo en cola # programar a sí mismo
   # }
 }
 
@@ -143,9 +149,9 @@ arr_a_C3 <- function() {
 #evento numero 2
 C1_termina <- function() {
   # #Aurelio
-  # #? cómo se toma el mensaje?
+  # R/ hacer pop de la cola #? cómo se toma el mensaje?
   # r = runif(n, min = 0, max = 1)
-  
+  # mensajes devueltos ++
   # if(mensaje@PC_origen == 2 ){
   #   if( r > x1 ){
   #     # cola_msj_destino$insert(msj)
@@ -178,13 +184,15 @@ C1_termina <- function() {
   # #? Si un mensaje entra aquí, se procesa y después de consumir ese tiempo se decide qué hacer con él
 
   # if(cola_msj_C1$queuelength){ # crear función, creo el metodo es si se usara la librería # buscar método para saber el length
-  #   #? analalizar esto, parece que el ocupado no se asigna aquí # // ocupado = true porque se le asigna lo ocupado en el evento llega msj
+  #   #? analizar esto, parece que el ocupado no se asigna aquí # // ocupado = true porque se le asigna lo ocupado en el evento llega msj
   #   cola_eventos$insert(reloj+D6, "2")
   # }
   # else{
   #   cola_eventos$insert(T_MAX*4, "2") #? definir el T_MAX como el tiempo final de la simulación # desprogramar evento
   #   C1_ocupado = false
   # }
+
+  # ? agreagr tiempo a mensaje
 }
 
 #evento numero 3
@@ -196,12 +204,19 @@ C2_termina <- function() {
   cola_trans_C2_a_C1$insert(mensaje)
   if(!cola_msj_C2$empty() & C2_N1_ocupado)
   {
-    C2_N1_ocupado = TRUE 
+    #C2_N1_ocupado = TRUE # es redudante
     cola_de_eventos$insert(reloj+D2,"3")
   }
-	ifelse(!cola_msj_C2$empty() & C2_N2_ocupado){ #esto no seria un if?
-		C2_N2_ocupado = TRUE
+  else{
+    C2_N1_ocupado = FALSE
+  }
+	#ifelse(!cola_msj_C2$empty() & C2_N2_ocupado){ #esto no seria un if?
+  if(!cola_msj_C2$empty() & C2_N2_ocupado){ #esto no seria un if?
+		#C2_N2_ocupado = TRUE # es redundante
 		cola_de_eventos$insert(reloj+D3,"3")
+  }
+  else{
+    C2_N2_ocupado = FALSE
   }
 }
 
@@ -237,7 +252,7 @@ devuelto_a_C2 <- function() {
   else 
   {
      cola_msj_C2(mensaje)
-     mensaje$tiempo_en_cola <- Sys.time() #Se empieza a tomar el tiempo en cola
+     mensaje$inicio_en_cola <- Sys.time() #Se empieza a tomar el tiempo en cola
      mensaje$en_cola = TRUE
   }
 }
