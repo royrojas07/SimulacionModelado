@@ -87,6 +87,9 @@ cola_trans_C1_a_C2 <- Queue()
 cola_trans_C1_a_C3 <- Queue()
 cola_trans_C2_a_C1 <- Queue()
 cola_trans_C3_a_C1 <- Queue()
+# cola_msj_destino <- Queue()
+# x1  # probabilidad x1, msj devuelto a PC2
+# x3  # probabilidad x3, msj devuelto a PC3
 
 C1_ocupado = "logical"
 C2_N1_ocupado = "logical"
@@ -110,7 +113,26 @@ simular <- function() {
 
 #evento numero 0
 arr_a_C2 <- function() {
-  #Aurelio
+  # #Aurelio
+  # # crear mensaje m # lo creamos aquí o desde afuera? Piendo que mejor aquí
+  # # ID=msj_id, PC_origen= 2, tiempo_en_cola=0, llegada_a_cola=0, tiempo_en_transmision=0, tiempo_C1=0  tiempo_Cx=0, num_total_devuelto=0, en_cola=false)
+  # # msj@ID = msj_id
+  # # contador de id mensajes + 1
+  # # msj_id += 1
+  # if( !C2_N1_ocupado | !C2_N2_ocupado ){
+  #   if( !C2_N1_ocupado ){
+  #     cola_de_eventos$insert(reloj+D2, "3")
+  #     C2_N1_ocupado = TRUE
+  #   }
+  #   else{
+  #     cola_de_eventos$insert(reloj+D3, "3") #? aumentar el tiempo en el evento 3
+  #     C2_N2_ocupado = TRUE
+  #   }
+  # }
+  # else{ # si núcleos ocupados, a la cola
+  #   cola_msj_C2()$insert(msj) #? verificar si el mensaje se inserta de esta manera
+  #   #? sumar aquí tiempo en cola
+  # }
 }
 
 #evento numero 1
@@ -120,7 +142,49 @@ arr_a_C3 <- function() {
 
 #evento numero 2
 C1_termina <- function() {
-  #Aurelio
+  # #Aurelio
+  # #? cómo se toma el mensaje?
+  # r = runif(n, min = 0, max = 1)
+  
+  # if(mensaje@PC_origen == 2 ){
+  #   if( r > x1 ){
+  #     # cola_msj_destino$insert(msj)
+  #   }
+  #   else{
+  #     # cola_eventos$insert(reloj+3,"5")
+  #     if( r > x3 ){
+  #       # cola_msj_destino$insert(msj)
+  #     }
+  #     else{
+  #       # cola_eventos$insert(reloj+3,"6")
+  #     }
+  #   }
+  # }
+  # else{ #? No está en el drive, pero puede recibir también de PC 3
+  #   #? se puede hacer más corto este código
+  #   if( r > x1 ){
+  #     # cola_msj_destino$insert(msj)
+  #   }
+  #   else{
+  #     # cola_eventos$insert(reloj+3,"6")
+  #     if( r > x3 ){ #? verificar el manejo de esta probabilidad
+  #       # cola_msj_destino$insert(msj)
+  #     }
+  #     else{
+  #       # cola_eventos$insert(reloj+3,"6")
+  #     }
+  #   }
+  # }
+  # #? Si un mensaje entra aquí, se procesa y después de consumir ese tiempo se decide qué hacer con él
+
+  # if(cola_msj_C1$queuelength){ # crear función, creo el metodo es si se usara la librería # buscar método para saber el length
+  #   #? analalizar esto, parece que el ocupado no se asigna aquí # // ocupado = true porque se le asigna lo ocupado en el evento llega msj
+  #   cola_eventos$insert(reloj+D6, "2")
+  # }
+  # else{
+  #   cola_eventos$insert(T_MAX*4, "2") #? definir el T_MAX como el tiempo final de la simulación # desprogramar evento
+  #   C1_ocupado = false
+  # }
 }
 
 #evento numero 3
@@ -202,7 +266,14 @@ devuelto_a_C3 <- function() {
 
 #evento numero 7
 llega_a_C1_de_C2 <- function() {
-  #Aurelio
+  # #Aurelio
+  # if(C1_ocupado){
+  #   cola_de_eventos$insert(reloj+D6)
+  #   C1_ocupado = TRUE
+  # }
+  # else{
+  #   #cola_msj_C1$insert( msj )
+  # }
 }
 
 #evento numero 8
