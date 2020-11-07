@@ -36,7 +36,8 @@ PriorityQueue <- function() {
     return(head)
   }
   empty <- function() length(keys) == 0
-  list(insert = insert, pop = pop, empty = empty)
+  clear <- function() keys <<- values <<- NULL
+  list(insert = insert, pop = pop, empty = empty, clear = clear)
 }
 
 #estructura de datos cola para guardar los mensajes de cada computadora, igualmente los rechazados y los aceptados
@@ -51,7 +52,8 @@ Queue <- function() {
     return(head)
   }
   empty <- function() length(values) == 0
-  list(insert = insert, pop = pop, empty = empty)
+  clear <- function()  values <<- NULL
+  list(insert = insert, pop = pop, empty = empty, clear = clear)
 }
 
 
