@@ -102,7 +102,7 @@ msj_ID <- 0
 
 simular <- function() {
   count <- 1
-  for(1 in c(1:10)) #el 10 indica cuantas veces quiero que se repita las simulaciones
+  for(i in 1:10) #el 10 indica cuantas veces quiero que se repita las simulaciones
   { 
     #t <- Sys.time()
     period <- 30 #cuantos segundos se quiere la simulacion
