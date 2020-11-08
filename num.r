@@ -44,8 +44,15 @@ PriorityQueue <- function() {
 #estructura de datos cola para guardar los mensajes de cada computadora, igualmente los rechazados y los aceptados
 Queue <- function() {
   values <- NULL
-  insert <- function(value) {
-    values <<- c(values, list(value))
+  insert <- function(value, pos) {
+    if( pos == 0 )
+    {
+      values <<- c(list(value), values)
+    }
+    else
+    {
+      values <<- c(values, list(value))
+    }
   }
   pop <- function() {
     head <- values[[1]]
@@ -157,8 +164,17 @@ arr_a_C2 <- function() {
 arr_a_C3 <- function() {
   #Roy
   """#se genera un nuevo mensaje
-  # ID=msj_id, PC_origen= 2, tiempo_en_cola=0, llegada_a_cola=0, tiempo_en_transmision=0, tiempo_C1=0  tiempo_Cx=0, num_total_devuelto=0, en_cola=false)
-  mensaje
+  mensaje <- new(
+    ID=msj_ID,
+    PC_origen=2,
+    tiempo_en_cola=0,
+    llegada_a_cola=0,
+    tiempo_en_transmision=0,
+    tiempo_C1=0,
+    tiempo_Cx=0,
+    num_total_devuelto=0,
+    en_cola=FALSE
+  )
   if( !C3_ocupado )
   {
     # generar v.a. para D5
