@@ -121,7 +121,7 @@ arr_a_C2 <- function() {
   # #Aurelio
   # Crear adentro # crear mensaje m # lo creamos aquí o desde afuera? Piendo que mejor aquí
   #mensaje 
-  msj <- Mensaje(
+  msj <- new("Mensaje",
     ID=msj_ID,
     PC_origen=2,
     tiempo_en_cola=0,
@@ -132,6 +132,17 @@ arr_a_C2 <- function() {
     num_total_devuelto=0,
     en_cola=FALSE
   )
+  # msj <- Mensaje(
+    # ID=msj_ID,
+    # PC_origen=2,
+    # tiempo_en_cola=0,
+    # llegada_a_cola=0,
+    # tiempo_en_transmision=0,
+    # tiempo_C1=0,
+    # tiempo_Cx=0,
+    # num_total_devuelto=0,
+    # en_cola=FALSE
+  # )
   print(msj@ID)
   # # ID=msj_id, PC_origen= 2, tiempo_en_cola=0, llegada_a_cola=0, tiempo_en_transmision=0, tiempo_C1=0  tiempo_Cx=0, num_total_devuelto=0, en_cola=false)
   # # msj@ID = msj_id
