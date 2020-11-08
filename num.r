@@ -144,6 +144,29 @@ arr_a_C2 <- function() {
 #evento numero 1
 arr_a_C3 <- function() {
   #Roy
+  """#se genera un nuevo mensaje
+  # ID=msj_id, PC_origen= 2, tiempo_en_cola=0, llegada_a_cola=0, tiempo_en_transmision=0, tiempo_C1=0  tiempo_Cx=0, num_total_devuelto=0, en_cola=false)
+  mensaje
+  if( !C3_ocupado )
+  {
+    # generar v.a. para D5
+    # se programa el evento C3_termina
+    cola_eventos$insert( reloj+D5, "4" )
+    C3_ocupado = TRUE
+    # tiempo de procesamiento
+    mensaje@tiempo_Cx += D5
+    mensaje@en_cola = FALSE
+  }
+  else
+  {
+    mensaje@llegada_a_cola = reloj
+    mensaje@en_cola = TRUE
+  }
+  cola_msj_C3$insert( mensaje )
+
+  # se auto-programa el evento
+  # se genera v.a. para D4
+  cola_de_eventos$insert( reloj+D4, "1" )"""
 }
 
 #evento numero 2
@@ -223,6 +246,41 @@ C2_termina <- function() {
 #evento numero 4
 C3_termina <- function() {
   #Roy
+  """# se saca el mensaje
+  mensaje = cola_msj_C3$pop()
+  # se genera random [0,1]
+  rand = random()
+  if( rand < x2 ) # se rechaza
+  {
+    cola_msj_rechazados$insert( mensaje )
+  }
+  else # se envia el mensaje a C1
+  {
+    # se programa llega_a_C1_de_C3
+    cola_de_eventos$insert( reloj+20, "8" )
+    cola_trans_C3_a_C1$insert( mensaje )
+  }
+  
+  # se procede a revisar si hay mensajes en cola para procesar
+  if( !cola_msj_C3$empty() )
+  {
+    nuevo_mensaje = cola_msj_C3$pop()
+    if( nuevo_mensaje@en_cola ) # mensaje estaba en cola
+    {
+      # se incrementa tiempo en cola
+      nuevo_mensaje@tiempo_en_cola += reloj - nuevo_mensaje@llegada_a_cola
+      nuevo_mensaje@en_cola = FALSE # este booleano no esta sobrando?
+    }
+    cola_eventos$insert( reloj+D5, "4" )
+    # tiempo de procesamiento
+    nuevo_mensaje@tiempo_Cx += D5
+    # se debe volver a poner al mensaje en la E.Datos
+    cola_msj_C3$insert( nuevo_mensaje )
+  }
+  else
+  {
+    C3_ocupado = FALSE
+  }"""
 }
 
 #evento numero 5
