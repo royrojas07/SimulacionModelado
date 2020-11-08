@@ -423,6 +423,12 @@ llega_a_C1_de_C3 <- function() {
   }
 }
 
+uniforme <- function(a,b){
+  r = runif(1, min = 0, max = 1)
+  x = r*(b-a)+a
+  return(x)
+}
+
 #funcion encargada de asociar el respectivo id con la funcion correspondiente
 matching <- function(id) 
 {
