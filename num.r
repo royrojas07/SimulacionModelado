@@ -44,7 +44,7 @@ PriorityQueue <- function() {
 #estructura de datos cola para guardar los mensajes de cada computadora, igualmente los rechazados y los aceptados
 Queue <- function() {
   values <- NULL
-  insert <- function(value, pos) {
+  insert <- function(value, pos = 1) {
     if( pos == 0 )
     {
       values <<- c(list(value), values)
@@ -262,19 +262,33 @@ C2_termina <- function() {
   #Carlos
   cola_de_eventos$insert(reloj+20,"7")
   mensaje <- cola_msj_C2$pop() #DEBERIA PREGUNTA POR EL BOOL EN_COLA
-                                #ToDo: Hacer diferencia de tiempos para colas
+  mensaje@tiempo_en_cola += reloj - mensaje@llegada_a_cola                            
   cola_trans_C2_a_C1$insert(mensaje)
   if(!cola_msj_C2$empty() & C2_N1_ocupado)
   {
     #C2_N1_ocupado = TRUE # es redudante
+    nuevo_mensaje <- cola_msj_C2$pop()
+    if(nuevo_mensaje@en_cola)
+    {
+      nuevo_mensaje@tiempo_en_cola += reloj - nuevo_mensaje@llegada_a_cola
+    }
+    nuevo_mensaje@tiempo_Cx += D2
+    cola_msj_C2$insert(nuevo_mensaje,0)
     cola_de_eventos$insert(reloj+D2,"3")
   }
   else{
     C2_N1_ocupado = FALSE
   }
 	#ifelse(!cola_msj_C2$empty() & C2_N2_ocupado){ #esto no seria un if?
-  if(!cola_msj_C2$empty() & C2_N2_ocupado){ #esto no seria un if?
+  if(!cola_msj_C2$empty() & C2_N2_ocupado){ 
 		#C2_N2_ocupado = TRUE # es redundante
+    nuevo_mensaje <- cola_msj_C2$pop()
+    if(nuevo_mensaje@en_cola)
+    {
+      nuevo_mensaje@tiempo_en_cola += reloj - nuevo_mensaje@llegada_a_cola
+    }
+    nuevo_mensaje@tiempo_Cx += D3
+    cola_msj_C2$insert(nuevo_mensaje,0)
 		cola_de_eventos$insert(reloj+D3,"3")
   }
   else{
@@ -308,7 +322,7 @@ C3_termina <- function() {
     {
       # se incrementa tiempo en cola
       nuevo_mensaje@tiempo_en_cola += reloj - nuevo_mensaje@llegada_a_cola
-      nuevo_mensaje@en_cola = FALSE # este booleano no esta sobrando?
+      nuevo_mensaje@en_cola = FALSE # este booleano no esta sobrando? #Si creo que si 
     }
     cola_eventos$insert( reloj+D5, "4" )
     # tiempo de procesamiento
@@ -333,24 +347,24 @@ devuelto_a_C2 <- function() {
     {
       C2_N1_ocupado = TRUE
       cola_de_eventos$insert(reloj+D2,"3")
-      mensaje$tiempo_Cx <- D2
+      mensaje@tiempo_Cx += D2
       cola_msj_C2(mensaje)
-      mensaje$en_cola = FALSE
+      mensaje@en_cola <- FALSE
     }
     else 
     {
       C2_N2_ocupado <- TRUE
 		  cola_de_eventos$insert(reloj+D3,"3")   
-      mensaje$tiempo_Cx <- D3 #tiempo que dura procesandose
+      mensaje@tiempo_Cx += D3 #tiempo que dura procesandose
       cola_msj_C2(mensaje)
-      mensaje$en_cola = FALSE
+      mensaje@en_cola <- FALSE
     }
   }
   else 
   {
      cola_msj_C2(mensaje)
-     mensaje$inicio_en_cola <- Sys.time() #Se empieza a tomar el tiempo en cola
-     mensaje$en_cola = TRUE
+     mensaje@inicio_en_cola <- reloj #Se empieza a tomar el tiempo en cola
+     mensaje@en_cola <- TRUE
   }
 }
 
@@ -397,14 +411,14 @@ llega_a_C1_de_C3 <- function() {
   {
      C1_ocupado <- TRUE
      cola_de_eventos$insert(reloj+D6,"2")
-     mensaje$tiempo_C1 <- D6 #Tiempo que duraria procesandose
+     mensaje$tiempo_C1 += D6 #Tiempo que duraria procesandose
      cola_msj_C1$insert(mensaje)
      mensaje$en_cola <- FALSE
   }
   else 
   {
     cola_msj_C1$insert(mensaje) 
-    mensaje$tiempo_en_cola <- Sys.time() #Se empieza a tomar el tiempo en cola
+    mensaje$llegada_a_cola <- reloj #Se empieza a tomar el tiempo en cola
     mensaje$en_cola <- TRUE
   }
 }
