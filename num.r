@@ -69,13 +69,6 @@ Queue <- function() {
 #lectura del archivo de texto
 
 
-#    Colas     #
-
-# Rechazados
-# Aceptados
-# Cola de mensajes por Computadora
-# Cola de transmision.... En proceso
-
 #    Estadisticas Globales    #
 # Tiempo procesadores ocupados(Por procesador)
 # Tiempo en cola total
@@ -439,8 +432,6 @@ llega_a_C1_de_C3 <- function() {
   }
 }
 
-<<<<<<< HEAD
-=======
 # FUNCIONES MATEMATICAS PARA LAS DISTRIBUCIONES
 exponencial <- function( lambda ){
   r = runif(1, min = 0, max = 1)
@@ -465,7 +456,6 @@ normal_tlc <- function( media, varianza ){
   return (sqrt( varianza )*( r_sum-6 ) + media)
 }
 
->>>>>>> 4deaa0ae16391768e05868afdfe25b7fdcf64789
 funcion_densidad <- function(k,a,b)
 {
   r = runif(1,min=0,max=1)
