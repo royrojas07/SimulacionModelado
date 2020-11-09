@@ -13,6 +13,12 @@ slots = c(
   en_cola="logical")
 )
 
+Tupla <- setClass("Tupla",
+slots = c(
+  evento = "character",
+  tiempo = "numeric")
+) 
+
 Procesador <- setClass("Procesador",
   slots= c(
     tiempo_trabajado="numeric",
@@ -31,10 +37,10 @@ PriorityQueue <- function() {
     values <<- c(values, list(value))[ord]
   }
   pop <- function() {
-    head <- values[[1]]
+    tupla <<- new("Tupla",evento = values[[1]], tiempo=keys[[1]])
     values <<- values[-1]
     keys <<- keys[-1]
-    return(head)
+    return(tupla)
   }
   empty <- function() length(keys) == 0
   clear <- function() keys <<- values <<- NULL
@@ -259,34 +265,34 @@ C2_termina <- function() {
   #Carlos
   cola_de_eventos$insert(reloj+20,"7")
   mensaje <- cola_msj_C2$pop() #DEBERIA PREGUNTA POR EL BOOL EN_COLA
-  mensaje@tiempo_en_cola += reloj - mensaje@llegada_a_cola                            
+  mensaje@tiempo_en_cola <- mensaje@tiempo_en_cola + reloj - mensaje@llegada_a_cola                            
   cola_trans_C2_a_C1$insert(mensaje)
-  if(!cola_msj_C2$empty() & C2_N1_ocupado)
+  if(identical(FALSE,cola_msj_C2$empty()) & C2_N1_ocupado)
   {
     #C2_N1_ocupado = TRUE # es redudante
     nuevo_mensaje <- cola_msj_C2$pop()
     if(nuevo_mensaje@en_cola)
     {
-      nuevo_mensaje@tiempo_en_cola += reloj - nuevo_mensaje@llegada_a_cola
+      nuevo_mensaje@tiempo_en_cola <- nuevo_mensaje@tiempo_en_cola + reloj - nuevo_mensaje@llegada_a_cola
     }
-    nuevo_mensaje@tiempo_Cx += D2
+    nuevo_mensaje@tiempo_Cx <- nuevo_mensaje@tiempo_Cx + D2()
     cola_msj_C2$insert(nuevo_mensaje,0)
-    cola_de_eventos$insert(reloj+D2,"3")
+    cola_de_eventos$insert(reloj+D2(),"3")
   }
   else{
     C2_N1_ocupado = FALSE
   }
 	#ifelse(!cola_msj_C2$empty() & C2_N2_ocupado){ #esto no seria un if?
-  if(!cola_msj_C2$empty() & C2_N2_ocupado){ 
+  if(identical(FALSE,cola_msj_C2$empty()) & C2_N2_ocupado){ 
 		#C2_N2_ocupado = TRUE # es redundante
     nuevo_mensaje <- cola_msj_C2$pop()
     if(nuevo_mensaje@en_cola)
     {
-      nuevo_mensaje@tiempo_en_cola += reloj - nuevo_mensaje@llegada_a_cola
+      nuevo_mensaje@tiempo_en_cola <- nuevo_mensaje@tiempo_en_cola + reloj - nuevo_mensaje@llegada_a_cola
     }
-    nuevo_mensaje@tiempo_Cx += D3
+    nuevo_mensaje@tiempo_Cx <- nuevo_mensaje@tiempo_Cx + D3()
     cola_msj_C2$insert(nuevo_mensaje,0)
-		cola_de_eventos$insert(reloj+D3,"3")
+		cola_de_eventos$insert(reloj+D3(),"3")
   }
   else{
     C2_N2_ocupado = FALSE
@@ -334,24 +340,23 @@ C3_termina <- function() {
 
 #evento numero 5
 devuelto_a_C2 <- function() {
-  #Carlos
   mensaje = cola_trans_C1_a_C2$pop()
   mensaje@tiempo_en_transmision += 3
-  if(!C2_N1_ocupado | !C2_N2_ocupado)
+  if(identical(FALSE,C2_N1_ocupado) | identical(FALSE,C2_N2_ocupado))
   {
-    if(!C2_N1_ocupado)
+    if(identical(FALSE,C2_N1_ocupado) )
     {
-      C2_N1_ocupado = TRUE
-      cola_de_eventos$insert(reloj+D2,"3")
-      mensaje@tiempo_Cx += D2
+      C2_N1_ocupado <- TRUE
+      cola_de_eventos$insert(reloj+D2(),"3")
+      mensaje@tiempo_Cx <- mensaje@tiempo_Cx + D2()
       cola_msj_C2(mensaje)
       mensaje@en_cola <- FALSE
     }
     else 
     {
       C2_N2_ocupado <- TRUE
-		  cola_de_eventos$insert(reloj+D3,"3")   
-      mensaje@tiempo_Cx += D3 #tiempo que dura procesandose
+		  cola_de_eventos$insert(reloj+D3(),"3")   
+      mensaje@tiempo_Cx <- mensaje@tiempo_Cx + D3() #tiempo que dura procesandose
       cola_msj_C2(mensaje)
       mensaje@en_cola <- FALSE
     }
@@ -401,13 +406,13 @@ llega_a_C1_de_C2 <- function() {
 #evento numero 8
 llega_a_C1_de_C3 <- function() {
   #Carlos
-  mensaje = cola_trans_C3_a_C1$pop()
-  mensaje@tiempo_en_transmision += 20
-  if(!C1_ocupado)
+  mensaje <- cola_trans_C3_a_C1$pop()
+  mensaje@tiempo_en_transmision <- mensaje@tiempo_en_transmision + 20
+  if(identical(FALSE,C1_ocupado))
   {
      C1_ocupado <- TRUE
      cola_de_eventos$insert(reloj+D6,"2")
-     mensaje$tiempo_C1 += D6 #Tiempo que duraria procesandose
+     mensaje$tiempo_C1 <- mensaje$tiempo_C1+D6() #Tiempo que duraria procesandose
      cola_msj_C1$insert(mensaje)
      mensaje$en_cola <- FALSE
   }
@@ -522,6 +527,6 @@ D5 <- function(){}
 D5 <- function(){}
 
 #Ejemplo de usar las estructuras
-mensaje1 <- new("mensaje",ID=1,origen=2)
+
 
 print(mensaje1@origen)
