@@ -171,7 +171,7 @@ arr_a_C2 <- function() {
 #evento numero 1
 arr_a_C3 <- function() {
   #Roy
-  """#se genera un nuevo mensaje
+  #se genera un nuevo mensaje
   mensaje <- new(
     ID=msj_ID,
     PC_origen=2,
@@ -190,7 +190,7 @@ arr_a_C3 <- function() {
     cola_eventos$insert( reloj+D5, "4" )
     C3_ocupado = TRUE
     # tiempo de procesamiento
-    mensaje@tiempo_Cx += D5
+    mensaje@tiempo_Cx = mensaje@tiempo_Cx + D5
     mensaje@en_cola = FALSE
   }
   else
@@ -202,7 +202,7 @@ arr_a_C3 <- function() {
 
   # se auto-programa el evento
   # se genera v.a. para D4
-  cola_de_eventos$insert( reloj+D4, "1" )"""
+  cola_de_eventos$insert( reloj+D4, "1" )
 }
 
 #evento numero 2
@@ -296,11 +296,11 @@ C2_termina <- function() {
 #evento numero 4
 C3_termina <- function() {
   #Roy
-  """# se saca el mensaje
+  # se saca el mensaje
   mensaje = cola_msj_C3$pop()
   # se genera random [0,1]
-  rand = random()
-  if( rand < x2 ) # se rechaza
+  r = runif( 1, min = 0, max = 1 )
+  if( r < x2 ) # se rechaza
   {
     cola_msj_rechazados$insert( mensaje )
   }
@@ -314,23 +314,22 @@ C3_termina <- function() {
   # se procede a revisar si hay mensajes en cola para procesar
   if( !cola_msj_C3$empty() )
   {
-    nuevo_mensaje = cola_msj_C3$pop()
-    if( nuevo_mensaje@en_cola ) # mensaje estaba en cola
+    msj = cola_msj_C3$pop()
+    if( msj@en_cola ) # mensaje estaba en cola
     {
       # se incrementa tiempo en cola
-      nuevo_mensaje@tiempo_en_cola += reloj - nuevo_mensaje@llegada_a_cola
-      nuevo_mensaje@en_cola = FALSE # este booleano no esta sobrando? #Si creo que si 
+      msj@tiempo_en_cola = msj@tiempo_en_cola + reloj - msj@llegada_a_cola
     }
     cola_eventos$insert( reloj+D5, "4" )
     # tiempo de procesamiento
-    nuevo_mensaje@tiempo_Cx += D5
+    msj@tiempo_Cx = msj@tiempo_Cx + D5
     # se debe volver a poner al mensaje en la E.Datos
-    cola_msj_C3$insert( nuevo_mensaje )
+    cola_msj_C3$insert( nuevo_mensaje, 0 )
   }
   else
   {
     C3_ocupado = FALSE
-  }"""
+  }
 }
 
 #evento numero 5
@@ -369,13 +368,13 @@ devuelto_a_C2 <- function() {
 devuelto_a_C3 <- function() {
   #Roy
   mensaje = cola_trans_C1_a_C3$pop()
-  mensaje@tiempo_en_transmision += 3
+  mensaje@tiempo_en_transmision = mensaje@tiempo_en_transmision + 3
   if( !C3_ocupado ) # se empieza a procesar mensaje
   {
     # se programa evento C3_termina
     cola_de_eventos$insert( reloj + D5, "4" )
     C3_ocupado = TRUE
-    mensaje@tiempo_Cx += D5
+    mensaje@tiempo_Cx = mensaje@tiempo_Cx + D5
     # aca igual habria que agregar a la cola tal vez con una bandera?
     mensaje@en_cola = FALSE
   }
@@ -478,7 +477,6 @@ matching <- function(id)
         "8" = llega_a_C1_de_C3())
 }
 
-
 asignarDistribuciones <- function()
 {
   # se iteran las filas del csv
@@ -491,9 +489,9 @@ asignarDistribuciones <- function()
       distr = strsplit( distr, split='-', fixed=TRUE )
     } else
       distr = list( distr )
-    for( i in distr[1] )
+    for( i in distr[[1]] )
     {
-      nombre_distr = "exponencial"
+      nombre_distr = input[row,2]
       switch( i,
         "1" = {D1 <- matchDistributionNames( nombre_distr )},
         "2" = {D2 <- matchDistributionNames( nombre_distr )},
@@ -515,6 +513,13 @@ matchDistributionNames <- function( name )
         "exponencial" = exponencial,
         "func_densidad" = funcion_densidad)
 }
+
+D1 <- function(){}
+D2 <- function(){}
+D3 <- function(){}
+D4 <- function(){}
+D5 <- function(){}
+D5 <- function(){}
 
 #Ejemplo de usar las estructuras
 mensaje1 <- new("mensaje",ID=1,origen=2)
