@@ -438,6 +438,18 @@ normal_tlc <- function( media, varianza ){
   return (sqrt( varianza )*( r_sum-6 ) + media)
 }
 
+funcion_densidad <- function(k,a,b)
+{
+  r = runif(1,min=0,max=1)
+  random <- sqrt(r*(k/2)+a^2)
+  return(random)
+}
+
+uniforme <- function(a,b){
+  r = runif(1, min = 0, max = 1)
+  x = r*(b-a)+a
+  return(x)
+}
 
 #funcion encargada de asociar el respectivo id con la funcion correspondiente
 matching <- function(id) 
