@@ -490,6 +490,44 @@ matching <- function(id)
         "8" = llega_a_C1_de_C3())
 }
 
+
+asignarDistribuciones <- function()
+{
+  # se iteran las filas del csv
+  for( row in 1:nrows( input ) ) # cómo sacar las filas de la matriz?
+  {
+    distr = input[row, 1] # esto siempre retornaría un string?
+    if( nchar( distr ) > 1 )
+    {
+      # se divide el string por '-'
+      distr = strsplit( distr, split='-', fixed=TRUE )
+    } else
+      distr = list( distr )
+    for( i in distr[1] )
+    {
+      nombre_distr = "exponencial"
+      switch( i,
+        "1" = {D1 <- matchDistributionNames( nombre_distr )},
+        "2" = {D2 <- matchDistributionNames( nombre_distr )},
+        "3" = {D3 <- matchDistributionNames( nombre_distr )},
+        "4" = {D4 <- matchDistributionNames( nombre_distr )},
+        "5" = {D5 <- matchDistributionNames( nombre_distr )},
+        "6" = {D6 <- matchDistributionNames( nombre_distr )})
+    }
+  }
+}
+
+# asocia el nombre ingresado por el usuario con la función
+matchDistributionNames <- function( name ) 
+{
+  switch(name,
+        "normal_metodo_directo" = normal_directo, # cualquier cosa cambiar el nombre
+        "normal_TLC" = normal_tlc,
+        "uniforme" = uniforme,
+        "exponencial" = exponencial,
+        "func_densidad" = funcion_densidad)
+}
+
 #Ejemplo de usar las estructuras
 mensaje1 <- new("mensaje",ID=1,origen=2)
 
