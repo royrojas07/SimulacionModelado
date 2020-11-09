@@ -375,11 +375,12 @@ devuelto_a_C3 <- function() {
   mensaje@tiempo_en_transmision += 3
   if( !C3_ocupado ) # se empieza a procesar mensaje
   {
+    # se genera v.a. para D5
+    D5 = distribucion( "D5" )
     # se programa evento C3_termina
     cola_de_eventos$insert( reloj + D5, "4" )
     C3_ocupado = TRUE
     mensaje@tiempo_Cx += D5
-    # aca igual habria que agregar a la cola tal vez con una bandera?
     mensaje@en_cola = FALSE
   }
   else # esta ocupado
@@ -423,6 +424,21 @@ llega_a_C1_de_C3 <- function() {
   }
 }
 
+# FUNCIONES MATEMATICAS PARA LAS DISTRIBUCIONES
+exponencial <- function( lambda ){
+  r = random()
+  return (-log(1-r)/lambda)
+}
+
+# se toma k=12 como se sugiere en el libro
+normal_tlc <- function( media, varianza ){
+  r_sum <- 0
+  for( i in 1:12 )
+    r_sum = r_sum + runif(1, min = 0, max = 1)
+  return (sqrt( varianza )*( r_sum-6 ) + media)
+}
+
+
 #funcion encargada de asociar el respectivo id con la funcion correspondiente
 matching <- function(id) 
 {
@@ -436,6 +452,13 @@ matching <- function(id)
         "6" = devuelto_a_C3(),
         "7" = llega_a_C1_de_C2(),
         "8" = llega_a_C1_de_C3())
+}
+
+distribucion <- function(id) 
+{
+  switch(id,
+        "0" = arr_a_C2(),
+        "1" = arr_a_C3())
 }
 
 #Ejemplo de usar las estructuras
