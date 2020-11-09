@@ -435,7 +435,7 @@ normal_metodo_directo <- function(media, varianza){
    r1 = runif(1, min = 0, max = 1)
    r2 = runif(1, min = 0, max = 1)
    # en R, log es logaritmo natural
-   x = ( sqrt( -2*log(r1) ) * cos(360*r2) ) # 2*pi RAD = 360°
+   x = ( sqrt( -2*log(r1) ) * cos(2*pi*r2) ) # 2*pi RAD = 360°
    x = (sigma * x) + media  # paréntesis por claridad
    return (x)
 }
