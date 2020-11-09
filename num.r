@@ -430,6 +430,16 @@ exponencial <- function( lambda ){
   return (-log(1-r)/lambda)
 }
 
+normal_metodo_directo <- function(media, varianza){
+   sigma = sqrt( varianza ) # desviación estándar = sigma
+   r1 = runif(1, min = 0, max = 1)
+   r2 = runif(1, min = 0, max = 1)
+   # en R, log es logaritmo natural
+   x = ( sqrt( -2*log(r1) ) * cos(360*r2) ) # 2*pi RAD = 360°
+   x = (sigma * x) + media  # paréntesis por claridad
+   return (x)
+}
+
 # se toma k=12 como se sugiere en el libro
 normal_tlc <- function( media, varianza ){
   r_sum <- 0
