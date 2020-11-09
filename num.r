@@ -134,10 +134,9 @@ simular <- function() {
 
 #evento numero 0
 arr_a_C2 <- function() {
-  # #Aurelio
-  # Crear adentro # crear mensaje m # lo creamos aquí o desde afuera? Piendo que mejor aquí
-  #mensaje 
-  msj <- new("Mensaje",
+  #Aurelio
+  # Crear adentro
+  msj <- new ("Mensaje",
     ID=msj_ID,
     PC_origen=2,
     tiempo_en_cola=0,
@@ -148,36 +147,25 @@ arr_a_C2 <- function() {
     num_total_devuelto=0,
     en_cola=FALSE
   )
-  # msj <- Mensaje(
-    # ID=msj_ID,
-    # PC_origen=2,
-    # tiempo_en_cola=0,
-    # llegada_a_cola=0,
-    # tiempo_en_transmision=0,
-    # tiempo_C1=0,
-    # tiempo_Cx=0,
-    # num_total_devuelto=0,
-    # en_cola=FALSE
-  # )
   print(msj@ID)
-  # # ID=msj_id, PC_origen= 2, tiempo_en_cola=0, llegada_a_cola=0, tiempo_en_transmision=0, tiempo_C1=0  tiempo_Cx=0, num_total_devuelto=0, en_cola=false)
-  # # msj@ID = msj_id
-  # # contador de id mensajes + 1
-  # # msj_id += 1
-  # if( !C2_N1_ocupado | !C2_N2_ocupado ){
-  #   if( !C2_N1_ocupado ){
-  #     cola_de_eventos$insert(reloj+D2, "3")
-  #     C2_N1_ocupado = TRUE
-  #   }
-  #   else{
-  #     cola_de_eventos$insert(reloj+D3, "3") #? aumentar el tiempo en el evento 3
-  #     C2_N2_ocupado = TRUE
-  #   }
-  # }
-  # else{ # si núcleos ocupados, a la cola
-  #   cola_msj_C2()$insert(msj) #? verificar si el mensaje se inserta de esta manera
-  #   #? sumar aquí tiempo en cola # programar a sí mismo
-  # }
+  msj_ID = msj_ID + 1 # aumentar el contador de mensajes
+  #if( !C2_N1_ocupado | !C2_N2_ocupado ){
+  if( identical(FALSE, C2_N1_ocupado) | identical(FALSE, C2_N2_ocupado) ){
+    #if( !C2_N1_ocupado ){
+    if( identical(FALSE, C2_N1_ocupado) ){
+      cola_de_eventos$insert(reloj+D2, "3")
+      C2_N1_ocupado = TRUE
+    }
+    else{
+      cola_de_eventos$insert(reloj+D3, "3") #? aumentar el tiempo en el evento 3
+      C2_N2_ocupado = TRUE
+    }
+    # cola_de_eventos$insert(reloj+D1, "0") # siguiente arribo de mensaje
+  }
+  else{ # si núcleos ocupados, a la cola
+    cola_msj_C2()$insert(msj) #? verificar si el mensaje se inserta de esta manera
+    #? sumar aquí tiempo en cola # programar a sí mismo
+  }
 }
 
 #evento numero 1
