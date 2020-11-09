@@ -430,6 +430,12 @@ funcion_densidad <- function(k,a,b)
   return(random)
 }
 
+uniforme <- function(a,b){
+  r = runif(1, min = 0, max = 1)
+  x = r*(b-a)+a
+  return(x)
+}
+
 #funcion encargada de asociar el respectivo id con la funcion correspondiente
 matching <- function(id) 
 {
