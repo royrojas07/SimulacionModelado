@@ -426,7 +426,7 @@ llega_a_C1_de_C3 <- function() {
 funcion_densidad <- function(k,a,b)
 {
   r = runif(1,min=0,max=1)
-  random <- sqrt(r*(k/2)*a^2)
+  random <- sqrt(r*(k/2)+a^2)
   return(random)
 }
 
