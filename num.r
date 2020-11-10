@@ -111,6 +111,7 @@ C2_N2_trabajo <<- 0
 
 tiempoMaximo <<- 0
 
+
 entradaDatos = read.csv( "input.csv", header=FALSE )
 
 simular <- function() {
@@ -122,6 +123,15 @@ simular <- function() {
   tiempoMaximo <<- entradaDatos[10, 2] #cuantos segundos se quiere la simulacion
   print("Tiempo Max")
   print(tiempoMaximo)
+
+  # tiempos de ocupación por núcleo
+  total_c1 = 0
+  #total_c2_N1 = 0
+  C2_N1_trabajo
+  #total_c2_N2 = 0
+  C2_N2_trabajo
+  total_c3 = 0
+
   for(i in 1:repeticiones) #el 10 indica cuantas veces quiero que se repita las simulaciones
   {
     # se programan los primeros eventos
@@ -143,6 +153,12 @@ simular <- function() {
       asociar(siguiente@evento)
     }
     #Sacar y guardar las estadisticas por simulacion 
+    total_c1 = 0
+    #total_c2_N1 = 0
+    C2_N1_trabajo
+    #total_c2_N2 = 0
+    C2_N2_trabajo
+    total_c3 = 0
 
     #inicializacion para la siguiente simulacion 
     cola_de_eventos$clear()
