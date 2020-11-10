@@ -448,27 +448,6 @@ llega_a_C1_de_C2 <- function() {
 
 #evento numero 8
 llega_a_C1_de_C3 <- function() {
-  #Carlos
-  mensaje <- cola_trans_C3_a_C1$pop()
-  mensaje@tiempo_en_transmision <- mensaje@tiempo_en_transmision + 20
-  if(identical(FALSE,C1_ocupado))
-  {
-     C1_ocupado <- TRUE
-     cola_de_eventos$insert(reloj+D6,"2")
-     mensaje$tiempo_C1 <- mensaje$tiempo_C1+D6() #Tiempo que duraria procesandose
-     cola_msj_C1$insert(mensaje)
-     mensaje$en_cola <- FALSE
-  }
-  else 
-  {
-    cola_msj_C1$insert(mensaje) 
-    mensaje$llegada_a_cola <- reloj #Se empieza a tomar el tiempo en cola
-    mensaje$en_cola <- TRUE
-  }
-}
-
-#evento numero 8
-llega_a_C1_de_C3 <- function() {
   mensaje <- cola_trans_C3_a_C1$pop() #Se saca mensaje de la cola de transmision
   mensaje@tiempo_en_transmision <- mensaje@tiempo_en_transmision + 20 #Se suma el tiempo que se estuvo transmitiendo
   if(identical(FALSE,C1_ocupado)) #Pregunto si el C1 no esta ocupado
