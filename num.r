@@ -67,7 +67,6 @@ Queue <- function() {
   }
   empty <- function() length(values) == 0
   clear <- function()  values <<- NULL
-  show <- function(){ print(values) }
   list(insert = insert, pop = pop, empty = empty, clear = clear)
 }
 
@@ -323,11 +322,8 @@ C3_termina <- function() {
   if( !cola_msj_C3$empty() )
   {
     msj = cola_msj_C3$pop()
-    if( msj@en_cola ) # mensaje estaba en cola
-    {
-      # se incrementa tiempo en cola
-      msj@tiempo_en_cola = msj@tiempo_en_cola + reloj - msj@llegada_a_cola
-    }
+    # se incrementa tiempo en cola
+    msj@tiempo_en_cola = msj@tiempo_en_cola + reloj - msj@llegada_a_cola
     D5_va <- D5( 5 )
     cola_eventos$insert( reloj+D5_va, "4" )
     # tiempo de procesamiento
@@ -444,7 +440,7 @@ normal_metodo_directo <- function(media, varianza){
 }
 
 # se toma k=12 como se sugiere en el libro
-normal_tlc <- function( media, varianza, num_distr ){
+normal_tlc <- function( num_distr ){
   r_sum <- 0
   for( i in 1:12 )
     r_sum = r_sum + runif( 1, min = 0, max = 1 )
