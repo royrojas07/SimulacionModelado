@@ -96,8 +96,10 @@ cola_trans_C2_a_C1 <- Queue()
 cola_trans_C3_a_C1 <- Queue()
 cola_msj_destino <- Queue()
 cola_msj_rechazados <- Queue()
-# x1  # probabilidad x1, msj devuelto a PC2
-# x3  # probabilidad x3, msj devuelto a PC3
+
+x2 = 0.0  # probabilidad x2, que PC3 descarte un msj
+x1 = 0.0  # probabilidad x1, msj devuelto a PC2
+x3 = 0.0  # probabilidad x3, msj devuelto a PC3
 
 C1_ocupado = "logical"
 C2_N1_ocupado = "logical"
@@ -140,10 +142,10 @@ simular <- function() {
   #imprimir las estadisticas 
 }
 
-#evento numero 0
+# evento número 0
 arr_a_C2 <- function() {
-  #Aurelio
-  Crear adentro
+  # Aurelio
+  # Crear mensaje
   msj <- new ("Mensaje",
     ID=msj_ID,
     PC_origen=2,
@@ -155,25 +157,51 @@ arr_a_C2 <- function() {
     num_total_devuelto=0,
     en_cola=FALSE
   )
-  print(msj@ID)
-  msj_ID = msj_ID + 1 # aumentar el contador de mensajes
-  #if( !C2_N1_ocupado | !C2_N2_ocupado ){
-  if( identical(FALSE, C2_N1_ocupado) | identical(FALSE, C2_N2_ocupado) ){
-    #if( !C2_N1_ocupado ){
-    if( identical(FALSE, C2_N1_ocupado) ){
-      cola_de_eventos$insert(reloj+D2, "3")
-      C2_N1_ocupado = TRUE
+
+  # print(msj@ID) #* prueba para imprimir ID
+  msj_ID = msj_ID + 1 # aumentar el contador global de mensajes
+
+  if( identical(FALSE, C2_N1_ocupado) | identical(FALSE, C2_N2_ocupado) ){ # if( !C2_N1_ocupado | !C2_N2_ocupado ){
+    
+    msj@en_cola = FALSE
+    
+    # se insertará a la cola para tenerlo en un lugar donde guardar el mensaje
+    if( identical(FALSE, C2_N1_ocupado) ){ # if( !C2_N1_ocupado ){
+      
+      r_D = D2(2)
+      cola_de_eventos$insert( reloj+r_D, "3" ) # cuando de procesará el mensaje
+      C2_N1_ocupado = TRUE # el procesador tiene trabajo de procesar el mensaje
+      
+      mensaje@tiempo_Cx = mensaje@tiempo_Cx + r_D # simulación de que ha sido procesado
+      mensaje@en_cola = FALSE # ya fue procesado, no está en cola
+
     }
-    else{
-      cola_de_eventos$insert(reloj+D3, "3") #? aumentar el tiempo en el evento 3
+    else{ # si el núcleo 1 está ocupado, el núcleo 2 no lo está
+      
+      r_D = D3(3)
+      cola_de_eventos$insert( reloj+r_D, "3" )
       C2_N2_ocupado = TRUE
+
+      # tiempo de procesamiento
+      mensaje@tiempo_Cx = mensaje@tiempo_Cx + r_D
+      mensaje@en_cola = FALSE
+
     }
-    # cola_de_eventos$insert(reloj+D1, "0") # siguiente arribo de mensaje
+    
   }
-  else{ # si núcleos ocupados, a la cola
-    cola_msj_C2()$insert(msj) #? verificar si el mensaje se inserta de esta manera
-    #? sumar aquí tiempo en cola # programar a sí mismo
+  else{
+
+    # si núcleos ocupados, el mensaje está en cola
+    msj@en_cola = TRUE
+    msj@llegada_a_cola = reloj
+
   }
+
+  # en esta implementación siempre colocaremos el mensaje "en cola" para guardarlo en algún lado
+  # y el acumulador del tiempo en cola, se controla con el booleano en mensaje
+  cola_msj_C2$insert ( msj )
+  cola_de_eventos$insert( reloj+D1(1) , "0") # próximo arribo de mensaje en tiempo aleatorio, programarse a sí mismo
+
 }
 
 #evento numero 1
@@ -215,53 +243,60 @@ arr_a_C3 <- function() {
   cola_de_eventos$insert( reloj+D4_va, "1" )
 }
 
-#evento numero 2
+# evento número 2
 C1_termina <- function() {
   # #Aurelio
-  # R/ hacer pop de la cola #? cómo se toma el mensaje?
-  # r = runif(n, min = 0, max = 1)
+  # toma el mensaje por procesar
+  msj <- cola_msj_C1$pop()
+  
+  r = runif(1, min = 0, max = 1) # valor aleatorio para saber qué se hará con el mensaje (enviar al destino o devolver a la PC de origen)
+  # 0 - x1: msj devuelto a PC2
+  # 0 - x3: msj devuelto a PC3
   # mensajes devueltos ++
-  # if(mensaje@PC_origen == 2 ){
-  #   if( r > x1 ){
-  #     # cola_msj_destino$insert(msj)
-  #   }
-  #   else{
-  #     # cola_eventos$insert(reloj+3,"5")
-  #     if( r > x3 ){
-  #       # cola_msj_destino$insert(msj)
-  #     }
-  #     else{
-  #       # cola_eventos$insert(reloj+3,"6")
-  #     }
-  #   }
-  # }
-  # else{ #? No está en el drive, pero puede recibir también de PC 3
-  #   #? se puede hacer más corto este código
-  #   if( r > x1 ){
-  #     # cola_msj_destino$insert(msj)
-  #   }
-  #   else{
-  #     # cola_eventos$insert(reloj+3,"6")
-  #     if( r > x3 ){ #? verificar el manejo de esta probabilidad
-  #       # cola_msj_destino$insert(msj)
-  #     }
-  #     else{
-  #       # cola_eventos$insert(reloj+3,"6")
-  #     }
-  #   }
-  # }
-  # #? Si un mensaje entra aquí, se procesa y después de consumir ese tiempo se decide qué hacer con él
+  # resto de probabilidad: msj a destino
+  # cola_msj_destino$insert( msj )
+  
+  # ver el origen del mensaje y según la probabilidad,
+  # ver si se devuelve al origen o se envía al destino
+  #? ¿Dónde se agrega el tiempo que duró procesando, en el main "simulación"?
+  # si es la PC 2
+  if( identical( mensaje@PC_origen, 2 ) ){ # if( mensaje@PC_origen == 2 ){
+    if( r > x1 ){
+      cola_msj_destino$insert(msj)
+    }
+    else{
+      cola_trans_C1_a_C2$insert(msj) # meter en cola devolución a C2
+      cola_eventos$insert(reloj+3,"5") # se programa el evento de devolución el mensaje y dura 3 segundos
+      msj@num_total_devuelto = msj@num_total_devuelto+1
+    }
+  }
+  else{ # si es la PC 3
+    if( r > x3 ){
+      cola_msj_destino$insert(msj)
+    }
+    else{
+      cola_trans_C1_a_C2$insert(msj) # meter en cola devolución a C2
+      cola_eventos$insert(reloj+3,"6")
+      msj@num_total_devuelto = msj@num_total_devuelto+1
+    }
+  }
 
-  # if(cola_msj_C1$queuelength){ # crear función, creo el metodo es si se usara la librería # buscar método para saber el length
-  #   #? analizar esto, parece que el ocupado no se asigna aquí # // ocupado = true porque se le asigna lo ocupado en el evento llega msj
-  #   cola_eventos$insert(reloj+D6, "2")
-  # }
-  # else{
-  #   cola_eventos$insert(T_MAX*4, "2") #? definir el T_MAX como el tiempo final de la simulación # desprogramar evento
-  #   C1_ocupado = false
-  # }
 
-  # ? agreagr tiempo a mensaje
+  if( identical( FALSE, cola_msj_C1$empty() ) ){ # si hay mensajes en cola
+    msj = cola_msj_C3$pop()
+    
+    if( msj@en_cola ){ # si mensaje estaba en cola
+      msj@tiempo_en_cola = msj@tiempo_en_cola + (reloj - msj@llegada_a_cola) # aucumula tiempo en cola
+    }
+
+    cola_eventos$insert(reloj+D6(6), "2") # ver cuando los atiende
+    #? analizar esto, parece que el ocupado no se asigna aquí # // ocupado = true porque se le asigna lo ocupado en el evento llega msj
+  }
+  else{ #? C3_termina se está desprogramando?
+    cola_eventos$insert(T_MAX*4, "2") #? definir el T_MAX como el tiempo final de la simulación # desprogramar evento
+    C1_ocupado = false
+  }
+
 }
 
 #evento numero 3
@@ -391,16 +426,48 @@ devuelto_a_C3 <- function() {
   cola_msj_C3$insert( mensaje )
 }
 
-#evento numero 7
+# evento número 7
 llega_a_C1_de_C2 <- function() {
   # #Aurelio
-  # if(C1_ocupado){
-  #   cola_de_eventos$insert(reloj+D6)
-  #   C1_ocupado = TRUE
-  # }
-  # else{
-  #   #cola_msj_C1$insert( msj )
-  # }
+  msj <- cola_trans_C2_a_C1$pop()
+  msj@tiempo_en_transmision = msj@tiempo_en_transmision+20 # tiempo empleado en enviarse
+  
+  # llegó el mensaje, ver si el procesador lo atiende o espera en cola
+  if( identical(FALSE, C1_ocupado) ){ # !C1_ocupado
+    msj@en_cola = FALSE # el mensaje será el próximo en ser atendido
+    C1_ocupado = TRUE # procesador estará ocupado con este mensaje
+    #? No hace falta que se programe que C2 termine de procesar el mensaje ?
+  }
+  else{ # si el procesador está ocupado, espera en la cola
+    msj@en_cola = TRUE
+  }
+  cola_msj_C1$insert( msj ) # insertar mensaje en cola o listo para ser atendido por el procesador
+  
+  if( intentical( FALSE, cola_trans_C2_a_C1$empty() ) ){#? no de debería de programar solo si la cola no está vacía
+    cola_de_eventos$insert( reloj+D6() ) # próxima llegada de msj a C1 de parte de C2
+  }
+
+}
+
+#evento numero 8
+llega_a_C1_de_C3 <- function() {
+  #Carlos
+  mensaje <- cola_trans_C3_a_C1$pop()
+  mensaje@tiempo_en_transmision <- mensaje@tiempo_en_transmision + 20
+  if(identical(FALSE,C1_ocupado))
+  {
+     C1_ocupado <- TRUE
+     cola_de_eventos$insert(reloj+D6,"2")
+     mensaje$tiempo_C1 <- mensaje$tiempo_C1+D6() #Tiempo que duraria procesandose
+     cola_msj_C1$insert(mensaje)
+     mensaje$en_cola <- FALSE
+  }
+  else 
+  {
+    cola_msj_C1$insert(mensaje) 
+    mensaje$llegada_a_cola <- reloj #Se empieza a tomar el tiempo en cola
+    mensaje$en_cola <- TRUE
+  }
 }
 
 #evento numero 8
