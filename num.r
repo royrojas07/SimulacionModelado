@@ -274,30 +274,38 @@ arr_a_C2 <- function() {
       
       msj@tiempo_Cx <- msj@tiempo_Cx + r_D # simulación de que ha sido procesado
       C2_N1_trabajo <<- C2_N1_trabajo + r_D #Se agrega el tiempo trabajado al nucleo correspondiente
+      cola_msj_C2N1$insert( msj )
     }
     else{ # si el núcleo 1 está ocupado, el núcleo 2 no lo está
       r_D = D3(3)
-      cola_de_eventos$insert( reloj+r_D, "3" )
+      cola_de_eventos$insert( reloj+r_D, "9" )
       C2_N2_ocupado <<- TRUE
 
       # tiempo de procesamiento
       msj@tiempo_Cx <- msj@tiempo_Cx + r_D
       C2_N2_trabajo <<- C2_N2_trabajo + r_D #Se agrega el tiempo trabajado al nucleo correspondiente
+      cola_msj_C2N2$insert( msj )
     }
-    
   }
   else{
-    #print("No se programó")
     # si núcleos ocupados, el mensaje está en cola
     msj@llegada_a_cola = reloj
+    r <- runif(1, min = 0, max = 1)
+    if( r > 0.5 )
+    {
+      cola_msj_C2N1$insert( msj )
+    }
+    else
+    {
+      cola_msj_C2N2$insert( msj )
+    }
   }
 
   # en esta implementación siempre colocaremos el mensaje "en cola" para guardarlo en algún lado
   # y el acumulador del tiempo en cola, se controla con el booleano en mensaje
-  print("inserte a cola mensajes 2")
-  cola_msj_C2$insert( msj )
+  # print("inserte a cola mensajes 2")
+  # cola_msj_C2$insert( msj )
   cola_de_eventos$insert( reloj+D1(1) , "0") # próximo arribo de mensaje en tiempo aleatorio, programarse a sí mismo
-
 }
 
 #evento numero 1
