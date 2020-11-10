@@ -19,12 +19,7 @@ slots = c(
   tiempo = "numeric")
 ) 
 
-Procesador <- setClass("Procesador",
-  slots= c(
-    tiempo_trabajado="numeric",
-    inicio_trabajo="numeric"
-  )
-)
+
 
 #estructura de datos cola de prioridad para usar en los eventos 
 
@@ -107,6 +102,9 @@ C2_N2_ocupado = "logical"
 C3_ocupado = "logical"
 reloj <- 0
 msj_ID <- 0
+C2_N1_trabajo = "numeric"
+C2_N2_trabajo = "numeric"
+
 
 simular <- function() {
   count <- 1
@@ -138,6 +136,8 @@ simular <- function() {
     C3_ocupado <- FALSE
     msj_ID <- 0
     reloj <- 0
+    C2_N1_trabajo = 0
+    C2_N2_trabajo = 0
   }
   #imprimir las estadisticas 
 }
@@ -173,6 +173,7 @@ arr_a_C2 <- function() {
       C2_N1_ocupado = TRUE # el procesador tiene trabajo de procesar el mensaje
       
       mensaje@tiempo_Cx = mensaje@tiempo_Cx + r_D # simulación de que ha sido procesado
+      C2_N1_trabajo <- C2_N1_trabajo + r_D #Se agrega el tiempo trabajado al nucleo correspondiente
       mensaje@en_cola = FALSE # ya fue procesado, no está en cola
 
     }
@@ -184,6 +185,7 @@ arr_a_C2 <- function() {
 
       # tiempo de procesamiento
       mensaje@tiempo_Cx = mensaje@tiempo_Cx + r_D
+      C2_N2_trabajo <- C2_N2_trabajo + r_D #Se agrega el tiempo trabajado al nucleo correspondiente
       mensaje@en_cola = FALSE
 
     }
@@ -311,6 +313,7 @@ C2_termina <- function() {
     nuevo_mensaje <- cola_msj_C2$pop() #Se casa un nuevo mensaje de la cola
     nuevo_mensaje@tiempo_en_cola <- nuevo_mensaje@tiempo_en_cola + reloj - nuevo_mensaje@llegada_a_cola # Si estaba en la cola se obtiene el tiempo que estuvo ahi
     nuevo_mensaje@tiempo_Cx <- nuevo_mensaje@tiempo_Cx + d2 #Se le agrega el tiempo de procesamiento que va a tener
+    C2_N1_trabajo <- C2_N1_trabajo + d2 #Se agrega el tiempo trabajado al nucleo correspondiente
     cola_msj_C2$insert(nuevo_mensaje,0) #Se inserta en el head de la cola
     cola_de_eventos$insert(reloj+d2,"3") #Se program este evento asi mismo
   }
@@ -322,6 +325,7 @@ C2_termina <- function() {
     nuevo_mensaje <- cola_msj_C2$pop() #Se casa un nuevo mensaje de la cola
     nuevo_mensaje@tiempo_en_cola <- nuevo_mensaje@tiempo_en_cola + reloj - nuevo_mensaje@llegada_a_cola # Si estaba en la cola se obtiene el tiempo que estuvo ahi
     nuevo_mensaje@tiempo_Cx <- nuevo_mensaje@tiempo_Cx + d3  #Se le agrega el tiempo de procesamiento que va a tener
+    C2_N2_trabajo <- C2_N2_trabajo + d3 #Se agrega el tiempo trabajado al nucleo correspondiente
     cola_msj_C2$insert(nuevo_mensaje,0) #Se inserta en el head de la cola
 		cola_de_eventos$insert(reloj+d3,"3")  #Se programa este evento asi mismo
   }
@@ -379,6 +383,7 @@ devuelto_a_C2 <- function() {
       C2_N1_ocupado <- TRUE #Ahora esta ocupado
       cola_de_eventos$insert(reloj+d2,"3") #Se programa el evento C2 termina que corresponde al 3
       mensaje@tiempo_Cx <- mensaje@tiempo_Cx + d2 #Se agrega a la estructura el tiempo que va a durar procesandose
+      C2_N1_trabajo <- C2_N1_trabajo + d2 #Se agrega el tiempo trabajado al nucleo correspondiente
       cola_msj_C2(mensaje) #Se agrega a la cola de mensajes para que C2 termina lo pueda acceder
       mensaje@en_cola <- FALSE #Se pone en falso porque no va a estar en la cola, solo se agrega para que C2 termina lo pueda acceder
     }
@@ -388,6 +393,7 @@ devuelto_a_C2 <- function() {
       C2_N2_ocupado <- TRUE  #Ahora esta ocupado
 		  cola_de_eventos$insert(reloj+d3,"3") #Se programa el evento C2 termina que corresponde al 3
       mensaje@tiempo_Cx <- mensaje@tiempo_Cx + d3 #tiempo que dura procesandose
+      C2_N2_trabajo <- C2_N2_trabajo + d3 #Se agrega el tiempo trabajado al nucleo correspondiente
       cola_msj_C2(mensaje) #Se agrega a la cola de mensajes para que C2 termina lo pueda acceder
       mensaje@en_cola <- FALSE  #Se pone en falso porque no va a estar en la cola, solo se agrega para que C2 termina lo pueda acceder
     }
