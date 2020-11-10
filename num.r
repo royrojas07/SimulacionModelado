@@ -61,6 +61,7 @@ Queue <- function() {
   }
   empty <- function() length(values) == 0
   clear <- function()  values <<- NULL
+  show <- function(){ print(values) }
   list(insert = insert, pop = pop, empty = empty, clear = clear)
 }
 
@@ -135,7 +136,7 @@ simular <- function() {
 #evento numero 0
 arr_a_C2 <- function() {
   #Aurelio
-  # Crear adentro
+  Crear adentro
   msj <- new ("Mensaje",
     ID=msj_ID,
     PC_origen=2,
@@ -172,9 +173,9 @@ arr_a_C2 <- function() {
 arr_a_C3 <- function() {
   #Roy
   #se genera un nuevo mensaje
-  mensaje <- new(
+  mensaje <- new( "Mensaje",
     ID=msj_ID,
-    PC_origen=2,
+    PC_origen=3,
     tiempo_en_cola=0,
     llegada_a_cola=0,
     tiempo_en_transmision=0,
@@ -183,14 +184,15 @@ arr_a_C3 <- function() {
     num_total_devuelto=0,
     en_cola=FALSE
   )
-  if( !C3_ocupado )
+  if( identical(FALSE, C3_ocupado) )
   {
     # generar v.a. para D5
+    D5_va <- D5( 5 )
     # se programa el evento C3_termina
-    cola_eventos$insert( reloj+D5, "4" )
+    cola_de_eventos$insert( reloj+D5_va, "4" )
     C3_ocupado = TRUE
     # tiempo de procesamiento
-    mensaje@tiempo_Cx = mensaje@tiempo_Cx + D5
+    mensaje@tiempo_Cx = mensaje@tiempo_Cx + D5_va
     mensaje@en_cola = FALSE
   }
   else
@@ -202,7 +204,8 @@ arr_a_C3 <- function() {
 
   # se auto-programa el evento
   # se genera v.a. para D4
-  cola_de_eventos$insert( reloj+D4, "1" )
+  D4_va <- D4( 4 )
+  cola_de_eventos$insert( reloj+D4_va, "1" )
 }
 
 #evento numero 2
@@ -320,9 +323,10 @@ C3_termina <- function() {
       # se incrementa tiempo en cola
       msj@tiempo_en_cola = msj@tiempo_en_cola + reloj - msj@llegada_a_cola
     }
-    cola_eventos$insert( reloj+D5, "4" )
+    D5_va <- D5( 5 )
+    cola_eventos$insert( reloj+D5_va, "4" )
     # tiempo de procesamiento
-    msj@tiempo_Cx = msj@tiempo_Cx + D5
+    msj@tiempo_Cx = msj@tiempo_Cx + D5_va
     # se debe volver a poner al mensaje en la E.Datos
     cola_msj_C3$insert( nuevo_mensaje, 0 )
   }
@@ -371,10 +375,11 @@ devuelto_a_C3 <- function() {
   mensaje@tiempo_en_transmision = mensaje@tiempo_en_transmision + 3
   if( !C3_ocupado ) # se empieza a procesar mensaje
   {
+    D5_va <- D5( 5 )
     # se programa evento C3_termina
-    cola_de_eventos$insert( reloj + D5, "4" )
+    cola_de_eventos$insert( reloj + D5_va, "4" )
     C3_ocupado = TRUE
-    mensaje@tiempo_Cx = mensaje@tiempo_Cx + D5
+    mensaje@tiempo_Cx = mensaje@tiempo_Cx + D5_va
     # aca igual habria que agregar a la cola tal vez con una bandera?
     mensaje@en_cola = FALSE
   }
@@ -420,9 +425,9 @@ llega_a_C1_de_C3 <- function() {
 }
 
 # FUNCIONES MATEMATICAS PARA LAS DISTRIBUCIONES
-exponencial <- function( lambda ){
+exponencial <- function( num_distribucion ){
   r = runif(1, min = 0, max = 1)
-  return (-log(1-r)/lambda)
+  return (-log(1-r)/input[num_distribucion, 2])
 }
 
 normal_metodo_directo <- function(media, varianza){
@@ -436,17 +441,17 @@ normal_metodo_directo <- function(media, varianza){
 }
 
 # se toma k=12 como se sugiere en el libro
-normal_tlc <- function( media, varianza ){
+normal_tlc <- function( media, varianza, num_distr ){
   r_sum <- 0
   for( i in 1:12 )
     r_sum = r_sum + runif( 1, min = 0, max = 1 )
-  return (sqrt( varianza )*( r_sum-6 ) + media)
+  return (sqrt( input[num_distr, 3] )*( r_sum-6 ) + input[num_distr, 2])
 }
 
 funcion_densidad <- function(k,a,b)
 {
   r = runif(1,min=0,max=1)
-  random <- sqrt(r*(k/2)a^2)
+  random <- sqrt(r*(k/2) + a^2)
   if(a <= random & random <= b)
   {
     return(random)
@@ -461,6 +466,13 @@ uniforme <- function(a,b){
   x = r*(b-a)+a
   return(x)
 }
+
+D1 <- function(...){}
+D2 <- function(...){}
+D3 <- function(...){}
+D4 <- function(...){}
+D5 <- function(...){}
+D6 <- function(...){}
 
 #funcion encargada de asociar el respectivo id con la funcion correspondiente
 matching <- function(id) 
@@ -480,48 +492,26 @@ matching <- function(id)
 asignarDistribuciones <- function()
 {
   # se iteran las filas del csv
-  for( row in 1:nrows( input ) ) # cómo sacar las filas de la matriz?
+  for( row in 1:6 ) # cómo sacar las filas de la matriz?
   {
-    distr = input[row, 1] # esto siempre retornaría un string?
-    if( nchar( distr ) > 1 )
-    {
-      # se divide el string por '-'
-      distr = strsplit( distr, split='-', fixed=TRUE )
-    } else
-      distr = list( distr )
-    for( i in distr[[1]] )
-    {
-      nombre_distr = input[row,2]
-      switch( i,
-        "1" = {D1 <- matchDistributionNames( nombre_distr )},
-        "2" = {D2 <- matchDistributionNames( nombre_distr )},
-        "3" = {D3 <- matchDistributionNames( nombre_distr )},
-        "4" = {D4 <- matchDistributionNames( nombre_distr )},
-        "5" = {D5 <- matchDistributionNames( nombre_distr )},
-        "6" = {D6 <- matchDistributionNames( nombre_distr )})
-    }
+    nombre_distr = input[row,1]
+    switch( row,
+      {D1 <<- matchDistributionNames( nombre_distr )},
+      {D2 <<- matchDistributionNames( nombre_distr )},
+      {D3 <<- matchDistributionNames( nombre_distr )},
+      {D4 <<- matchDistributionNames( nombre_distr )},
+      {D5 <<- matchDistributionNames( nombre_distr )},
+      {D6 <<- matchDistributionNames( nombre_distr )})
   }
 }
 
 # asocia el nombre ingresado por el usuario con la función
-matchDistributionNames <- function( name ) 
+matchDistributionNames <- function( name )
 {
-  switch(name,
-        "normal_metodo_directo" = normal_directo, # cualquier cosa cambiar el nombre
-        "normal_TLC" = normal_tlc,
-        "uniforme" = uniforme,
-        "exponencial" = exponencial,
-        "func_densidad" = funcion_densidad)
+  switch( name,
+    "normal_metodo_directo" = normal_metodo_directo, # cualquier cosa cambiar el nombre
+    "normal_TLC" = normal_tlc,
+    "uniforme" = uniforme,
+    "exponencial" = exponencial,
+    "func_densidad" = funcion_densidad)
 }
-
-D1 <- function(){}
-D2 <- function(){}
-D3 <- function(){}
-D4 <- function(){}
-D5 <- function(){}
-D5 <- function(){}
-
-#Ejemplo de usar las estructuras
-mensaje1 <- new("mensaje",ID=1,origen=2)
-
-print(mensaje1@origen)
