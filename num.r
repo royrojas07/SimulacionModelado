@@ -32,7 +32,9 @@ PriorityQueue <- function() {
     values <<- c(values, list(value))[ord]
   }
   pop <- function() {
-    tupla <<- new("Tupla",evento = values[[1]], tiempo=keys[[1]])
+    head <- values[[1]]
+    headKey <- keys[[1]]
+    tupla <<- new("Tupla",evento = head, tiempo=headKey)
     values <<- values[-1]
     keys <<- keys[-1]
     return(tupla)
@@ -92,30 +94,44 @@ cola_trans_C3_a_C1 <- Queue()
 cola_msj_destino <- Queue()
 cola_msj_rechazados <- Queue()
 
-x2 = 0.0  # probabilidad x2, que PC3 descarte un msj
-x1 = 0.0  # probabilidad x1, msj devuelto a PC2
-x3 = 0.0  # probabilidad x3, msj devuelto a PC3
+x2 <- 0.0  # probabilidad x2, que PC3 descarte un msj
+x1 <- 0.0  # probabilidad x1, msj devuelto a PC2
+x3 <- 0.0  # probabilidad x3, msj devuelto a PC3
 
-C1_ocupado = "logical"
-C2_N1_ocupado = "logical"
-C2_N2_ocupado = "logical"
-C3_ocupado = "logical"
+C1_ocupado <- FALSE
+C2_N1_ocupado <- FALSE
+C2_N2_ocupado <- FALSE
+C3_ocupado <- FALSE
 reloj <- 0
 msj_ID <- 0
-C2_N1_trabajo = "numeric"
-C2_N2_trabajo = "numeric"
+C2_N1_trabajo <- 0
+C2_N2_trabajo <- 0
+
+tiempoMaximo <- 0
+
+entradaDatos = read.csv( "input.csv", header=FALSE )
+
 
 
 simular <- function() {
-  count <- 1
-  for(i in 1:10) #el 10 indica cuantas veces quiero que se repita las simulaciones
-  { 
-    period <- 30 #cuantos segundos se quiere la simulacion
-    while (reloj < period)
+  asignarDistribuciones()
+  x1 <- entradaDatos[7, 2]
+  x2 <- entradaDatos[8, 2]
+  x3 <- entradaDatos[9, 2]
+  repeticiones <- entradaDatos[11, 2]
+  tiempoMaximo <- entradaDatos[10, 2] #cuantos segundos se quiere la simulacion
+  for(i in 1:repeticiones) #el 10 indica cuantas veces quiero que se repita las simulaciones
+  {
+    # se programan los primeros eventos
+    cola_de_eventos$insert( 0, "0" )
+    cola_de_eventos$insert( 0, "1" )
+    #print
+    while (reloj < tiempoMaximo)
     {
+      print(reloj)
       siguiente <- cola_de_eventos$pop()
       reloj <- siguiente@tiempo
-      matching(siguiente@evento)
+      asociar(siguiente@evento)
     }
     #Sacar y guardar las estadisticas por simulacion 
 
@@ -158,41 +174,41 @@ arr_a_C2 <- function() {
     en_cola=FALSE
   )
 
-  # print(msj@ID) #* prueba para imprimir ID
   msj_ID = msj_ID + 1 # aumentar el contador global de mensajes
 
   if( identical(FALSE, C2_N1_ocupado) | identical(FALSE, C2_N2_ocupado) ){ # if( !C2_N1_ocupado | !C2_N2_ocupado ){
-    
+    print("Núcleo disponible")
     msj@en_cola = FALSE
     
     # se insertará a la cola para tenerlo en un lugar donde guardar el mensaje
     if( identical(FALSE, C2_N1_ocupado) ){ # if( !C2_N1_ocupado ){
-      
+      print("Núcleo 1 disponible")
       r_D = D2(2)
+      print(r_D)
       cola_de_eventos$insert( reloj+r_D, "3" ) # cuando de procesará el mensaje
       C2_N1_ocupado = TRUE # el procesador tiene trabajo de procesar el mensaje
       
-      mensaje@tiempo_Cx = mensaje@tiempo_Cx + r_D # simulación de que ha sido procesado
+      msj@tiempo_Cx = msj@tiempo_Cx + r_D # simulación de que ha sido procesado
       C2_N1_trabajo <- C2_N1_trabajo + r_D #Se agrega el tiempo trabajado al nucleo correspondiente
-      mensaje@en_cola = FALSE # ya fue procesado, no está en cola
+      msj@en_cola = FALSE # ya fue procesado, no está en cola
 
     }
     else{ # si el núcleo 1 está ocupado, el núcleo 2 no lo está
-      
+      print("Núcleo 2 disponible")
       r_D = D3(3)
       cola_de_eventos$insert( reloj+r_D, "3" )
       C2_N2_ocupado = TRUE
 
       # tiempo de procesamiento
-      mensaje@tiempo_Cx = mensaje@tiempo_Cx + r_D
+      msj@tiempo_Cx = msj@tiempo_Cx + r_D
       C2_N2_trabajo <- C2_N2_trabajo + r_D #Se agrega el tiempo trabajado al nucleo correspondiente
-      mensaje@en_cola = FALSE
+      msj@en_cola = FALSE
 
     }
     
   }
   else{
-
+    #print("No se programó")
     # si núcleos ocupados, el mensaje está en cola
     msj@en_cola = TRUE
     msj@llegada_a_cola = reloj
@@ -268,7 +284,7 @@ C1_termina <- function() {
     }
     else{
       cola_trans_C1_a_C2$insert(msj) # meter en cola devolución a C2
-      cola_eventos$insert(reloj+3,"5") # se programa el evento de devolución el mensaje y dura 3 segundos
+      cola_de_eventos$insert(reloj+3,"5") # se programa el evento de devolución el mensaje y dura 3 segundos
       msj@num_total_devuelto = msj@num_total_devuelto+1
     }
   }
@@ -277,8 +293,8 @@ C1_termina <- function() {
       cola_msj_destino$insert(msj)
     }
     else{
-      cola_trans_C1_a_C2$insert(msj) # meter en cola devolución a C2
-      cola_eventos$insert(reloj+3,"6")
+      cola_trans_C1_a_C3$insert(msj) # meter en cola devolución a C3
+      cola_de_eventos$insert(reloj+3,"6")
       msj@num_total_devuelto = msj@num_total_devuelto+1
     }
   }
@@ -291,12 +307,12 @@ C1_termina <- function() {
       msj@tiempo_en_cola = msj@tiempo_en_cola + (reloj - msj@llegada_a_cola) # aucumula tiempo en cola
     }
 
-    cola_eventos$insert(reloj+D6(6), "2") # ver cuando los atiende
+    cola_de_eventos$insert(reloj+D6(6), "2") # ver cuando los atiende
     #? analizar esto, parece que el ocupado no se asigna aquí # // ocupado = true porque se le asigna lo ocupado en el evento llega msj
   }
   else{ #? C3_termina se está desprogramando?
-    cola_eventos$insert(T_MAX*4, "2") #? definir el T_MAX como el tiempo final de la simulación # desprogramar evento
-    C1_ocupado = false
+    cola_de_eventos$insert(tiempoMaximo*4, "2") #? definir el T_MAX como el tiempo final de la simulación # desprogramar evento
+    C1_ocupado = FALSE
   }
 
 }
@@ -353,13 +369,13 @@ C3_termina <- function() {
   }
   
   # se procede a revisar si hay mensajes en cola para procesar
-  if( !cola_msj_C3$empty() )
+  if( identical(FALSE, cola_msj_C3$empty()) )
   {
     msj = cola_msj_C3$pop()
     # se incrementa tiempo en cola
     msj@tiempo_en_cola = msj@tiempo_en_cola + reloj - msj@llegada_a_cola
     D5_va <- D5( 5 )
-    cola_eventos$insert( reloj+D5_va, "4" )
+    cola_de_eventos$insert( reloj+D5_va, "4" )
     # tiempo de procesamiento
     msj@tiempo_Cx = msj@tiempo_Cx + D5_va
     # se debe volver a poner al mensaje en la E.Datos
@@ -475,14 +491,14 @@ llega_a_C1_de_C3 <- function() {
 
 # FUNCIONES MATEMATICAS PARA LAS DISTRIBUCIONES
 exponencial <- function( num_distribucion ){
-  lambda <- entradaDatos[num_distribucion, 2]
+  lambda <- as.numeric(entradaDatos[num_distribucion, 2])
   r = runif(1, min = 0, max = 1)
   return (-log(1-r)/lambda)
 }
 
 normal_metodo_directo <- function(num_distribucion){
-   media <- entradaDatos[num_distribucion, 2]
-   varianza <- entradaDatos[num_distribucion, 3]
+   media <- as.numeric(entradaDatos[num_distribucion, 2])
+   varianza <- as.numeric(entradaDatos[num_distribucion, 3])
    sigma = sqrt( varianza ) # desviación estándar = sigma
    r1 = runif(1, min = 0, max = 1)
    r2 = runif(1, min = 0, max = 1)
@@ -495,8 +511,8 @@ normal_metodo_directo <- function(num_distribucion){
 # se toma k=12 como se sugiere en el libro
 normal_tlc <- function( num_distribucion ){
   r_sum <- 0
-  media <- entradaDatos[num_distribucion, 2]
-  varianza <- entradaDatos[num_distribucion, 3]
+  media <- as.numeric(entradaDatos[num_distribucion, 2])
+  varianza <- as.numeric(entradaDatos[num_distribucion, 3])
   for( i in 1:12 )
     r_sum = r_sum + runif( 1, min = 0, max = 1 )
   return (sqrt( varianza )*( r_sum-6 ) + media)
@@ -504,9 +520,9 @@ normal_tlc <- function( num_distribucion ){
 
 funcion_densidad <- function(num_distr)
 {
-  k <- entradaDatos[num_distr, 4]
-  a <- entradaDatos[num_distr, 2]
-  b <- entradaDatos[num_distr, 3]
+  k <- as.numeric(entradaDatos[num_distr, 4])
+  a <- as.numeric(entradaDatos[num_distr, 2])
+  b <- as.numeric(entradaDatos[num_distr, 3])
   r = runif(1,min=0,max=1)
   random <- sqrt(r*(k/2) + a^2)
   if(a <= random & random <= b)
@@ -519,8 +535,8 @@ funcion_densidad <- function(num_distr)
 }
 
 uniforme <- function( num_distribucion ){
-  a <- entradaDatos[num_distribucion, 2]
-  b <- entradaDatos[num_distribucion, 3]
+  a <- as.numeric(entradaDatos[num_distribucion, 2])
+  b <- as.numeric(entradaDatos[num_distribucion, 3])
   r = runif(1, min = 0, max = 1)
   x = r*(b-a)+a
   return(x)
@@ -574,3 +590,5 @@ distribucionPorNombre <- function( nombre )
     "exponencial" = exponencial,
     "func_densidad" = funcion_densidad)
 }
+
+simular()
