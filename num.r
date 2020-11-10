@@ -157,7 +157,7 @@ simular <- function() {
     total_de_tiempo_trans_por_simulacion = 0
     total_de_tiempo_cola_por_simulacion = 0
 
-    while(identical(FALSE,cola_msj_destino$empty())
+    while(identical(FALSE,cola_msj_destino$empty()))
     {
       mensaje = cola_msj_destino$pop()
       total_c1_destinos = total_c1_destinos + mensaje@tiempo_C1
@@ -170,14 +170,12 @@ simular <- function() {
 
       #estadisticas generales de mensaje que fueron al destino en el sistema
       total_de_tiempo_procesado = total_de_tiempo_procesado + mensaje@tiempo_C1 + mensaje@tiempo_Cx #tiempo total de mensaje en el sistema proc.
-      total_de_tiempo_trans = total_de_tiempo_trans + mensaje@tiempo_en_transmision #tiempo total de mensaje en el sistema en trans 
-      total_de_tiempo_cola = total_de_tiempo_cola + mensaje@tiempo_en_cola  #tiempo total de mensaje en el sistema en cola
       total_devoluciones = total_devoluciones + mensaje@num_total_devuelto
 
       total_destinos = total_destinos + 1
     }
 
-     while(identical(FALSE,cola_msj_rechazados$empty())
+     while(identical(FALSE,cola_msj_rechazados$empty()))
     {
       mensaje = cola_msj_rechazados$pop()
       total_c1_rechazo = total_c1_rechazo + mensaje@tiempo_C1
@@ -187,8 +185,6 @@ simular <- function() {
 
       #estadisticas generales de mensaje que fueron rechazados en el sistema
       total_de_tiempo_procesado = total_de_tiempo_procesado + mensaje@tiempo_C1 + mensaje@tiempo_Cx #tiempo total de mensaje en el sistema proc.
-      total_de_tiempo_trans = total_de_tiempo_trans + mensaje@tiempo_en_transmision #tiempo total de mensaje en el sistema en trans 
-      total_de_tiempo_cola = total_de_tiempo_cola + mensaje@tiempo_en_cola  #tiempo total de mensaje en el sistema en cola
       total_devoluciones = total_devoluciones + mensaje@num_total_devuelto
 
       total_rechazados = total_rechazados + 1
@@ -209,7 +205,8 @@ simular <- function() {
 
     #Calculo para estadisticas generales
     total_de_mensajes_general = total_rechazados+total_destinos #Unicamente tomando en cuenta mensajes que salieron del sistema
-
+    total_de_tiempo_trans = total_de_tiempo_trans + total_de_tiempo_trans_por_simulacion #tiempo total de mensaje en el sistema en trans 
+    total_de_tiempo_cola = total_de_tiempo_cola + total_de_tiempo_cola_por_simulacion  #tiempo total de mensaje en el sistema en cola
     #inicializacion para la siguiente simulacion 
     cola_de_eventos$clear()
     cola_msj_C1$clear()
