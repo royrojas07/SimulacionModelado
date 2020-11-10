@@ -13,16 +13,14 @@ slots = c(
   en_cola="logical")
 )
 
+#Utilizada para sacar de la cola de eventos el evento y el tiempo para adelantar el reloj
 Tupla <- setClass("Tupla",
 slots = c(
   evento = "character",
   tiempo = "numeric")
 ) 
 
-
-
 #estructura de datos cola de prioridad para usar en los eventos 
-
 PriorityQueue <- function() {
   keys <<- values <<- NULL
   insert <- function(key, value) {
@@ -67,18 +65,6 @@ Queue <- function() {
   imprimir <- function() print(values)
   list(insert = insert, pop = pop, empty = empty, clear = clear, imprimir = imprimir)
 }
-
-
-
-#lectura del archivo de texto
-
-
-#    Estadisticas Globales    #
-# Tiempo procesadores ocupados(Por procesador)
-# Tiempo en cola total
-# Tiempo procesadores ocupados en msj rechazados(Por procesador C1 y C3)
-# mensajes rechazados total 
-# Numero de veces msj devueltos
 
 cola_de_eventos <<- PriorityQueue()
 
@@ -135,14 +121,14 @@ simular <- function() {
     # se programan los primeros eventos
     cola_de_eventos$insert( 0, "0" )
     cola_de_eventos$insert( 0, "1" )
-    #print
-    #print(tiempoMaximo)
+
     while (reloj < tiempoMaximo)
     {
-      siguiente <- cola_de_eventos$pop()
-      reloj <<- siguiente@tiempo
-      asociar(siguiente@evento)
+      siguiente <- cola_de_eventos$pop() #se saca el siguiente evento
+      reloj <<- siguiente@tiempo #se aumenta el reloj
+      asociar(siguiente@evento) #Ocurre el evento
     }
+
     #Sacar y guardar las estadisticas por simulacion 
     total_c1_destinos = 0
     total_c3_destinos = 0
@@ -186,6 +172,7 @@ simular <- function() {
       #print(mensaje@num_total_devuelto)
       total_rechazados = total_rechazados + 1
     }
+
     #Estadisticas por corrida de simulacion
     cat("CORRIDA NUMERO ", i, "\n")
     print("-----Porcentaje del tiempo de ocupacion de cada procesador-----")
@@ -205,26 +192,8 @@ simular <- function() {
     total_de_mensajes_general = total_rechazados+total_destinos #Unicamente tomando en cuenta mensajes que salieron del sistema
     total_de_tiempo_trans = total_de_tiempo_trans + total_de_tiempo_trans_por_simulacion #tiempo total de mensaje en el sistema en trans 
     total_de_tiempo_cola = total_de_tiempo_cola + total_de_tiempo_cola_por_simulacion  #tiempo total de mensaje en el sistema en cola
-    #inicializacion para la siguiente simulacion 
-    cola_de_eventos$clear()
-    cola_msj_C1$clear()
-    cola_msj_C2N1$clear()
-    cola_msj_C2N2$clear()
-    cola_msj_C3$clear()
-    cola_trans_C1_a_C2$clear()
-    cola_trans_C1_a_C3$clear()
-    cola_trans_C2_a_C1$clear()
-    cola_trans_C3_a_C1$clear()
-    cola_msj_destino$clear()
-    cola_msj_rechazados$clear()
-    C1_ocupado <<- FALSE
-    C2_N1_ocupado <<- FALSE
-    C2_N2_ocupado <<- FALSE
-    C3_ocupado <<- FALSE
-    msj_ID <<- 0
-    reloj <<- 0
-    C2_N1_trabajo <<- 0
-    C2_N2_trabajo <<- 0
+    
+    reiniciar_pos_simulacion() #inicializacion para la siguiente simulacion 
   }
   #Estadisticas generales de la simulacion
   print("ESTADISTICAS GENERALES")
@@ -244,9 +213,32 @@ simular <- function() {
   cat("Porcentaje de tiempo : ", total_de_tiempo_procesado/(total_de_tiempo_procesado+total_de_tiempo_cola+total_de_tiempo_trans), "\n")
 }
 
+reiniciar_pos_simulacion <- function() 
+{
+    cola_de_eventos$clear()
+    cola_msj_C1$clear()
+    cola_msj_C2N1$clear()
+    cola_msj_C2N2$clear()
+    cola_msj_C3$clear()
+    cola_trans_C1_a_C2$clear()
+    cola_trans_C1_a_C3$clear()
+    cola_trans_C2_a_C1$clear()
+    cola_trans_C3_a_C1$clear()
+    cola_msj_destino$clear()
+    cola_msj_rechazados$clear()
+    C1_ocupado <<- FALSE
+    C2_N1_ocupado <<- FALSE
+    C2_N2_ocupado <<- FALSE
+    C3_ocupado <<- FALSE
+    msj_ID <<- 0
+    reloj <<- 0
+    C2_N1_trabajo <<- 0
+    C2_N2_trabajo <<- 0
+}
+
+
 # evento número 0
 arr_a_C2 <- function() {
-  # Aurelio
   # Crear mensaje
   msj <- new ("Mensaje",
     ID=msj_ID,
@@ -264,7 +256,7 @@ arr_a_C2 <- function() {
 
   if( identical(FALSE, C2_N1_ocupado) | identical(FALSE, C2_N2_ocupado) ){ # if( !C2_N1_ocupado | !C2_N2_ocupado ){
     # se insertará a la cola para tenerlo en un lugar donde guardar el mensaje
-    if( identical(FALSE, C2_N1_ocupado) ){ # if( !C2_N1_ocupado ){
+    if( identical(FALSE, C2_N1_ocupado) ){ 
       r_D = D2(2)
       cola_de_eventos$insert( reloj+r_D, "3" ) # cuando de procesará el mensaje
       C2_N1_ocupado <<- TRUE # el procesador tiene trabajo de procesar el mensaje
@@ -300,8 +292,7 @@ arr_a_C2 <- function() {
 
   # en esta implementación siempre colocaremos el mensaje "en cola" para guardarlo en algún lado
   # y el acumulador del tiempo en cola, se controla con el booleano en mensaje
-  # print("inserte a cola mensajes 2")
-  # cola_msj_C2$insert( msj )
+ 
   cola_de_eventos$insert( reloj+D1(1) , "0") # próximo arribo de mensaje en tiempo aleatorio, programarse a sí mismo
 }
 
@@ -353,17 +344,8 @@ C1_termina <- function() {
   msj <- cola_msj_C1$pop()
   #print("despues de pop c1_termina")
   r = runif(1, min = 0, max = 1) # valor aleatorio para saber qué se hará con el mensaje (enviar al destino o devolver a la PC de origen)
-  # 0 - x1: msj devuelto a PC2
-  # 0 - x3: msj devuelto a PC3
-  # mensajes devueltos ++
-  # resto de probabilidad: msj a destino
-  # cola_msj_destino$insert( msj )
-  
-  # ver el origen del mensaje y según la probabilidad,
-  # ver si se devuelve al origen o se envía al destino
-  #? ¿Dónde se agrega el tiempo que duró procesando, en el main "simulación"?
   # si es la PC 2
-  if( identical( msj@PC_origen, 2 ) ){ # if( mensaje@PC_origen == 2 ){
+  if( identical( msj@PC_origen, 2 ) ){ 
     if( r > x1 ){
       cola_msj_destino$insert(msj)
     }
@@ -383,8 +365,6 @@ C1_termina <- function() {
       cola_de_eventos$insert(reloj+3,"6")
     }
   }
-
-
   if( identical( FALSE, cola_msj_C1$empty() ) & C1_ocupado ){ # si hay mensajes en cola
     msj = cola_msj_C1$pop()
     
@@ -395,10 +375,8 @@ C1_termina <- function() {
     cola_de_eventos$insert(reloj+d6, "2") # ver cuando los atiende
     msj@tiempo_C1 = msj@tiempo_C1 + d6
     cola_msj_C1$insert( msj, 0 )
-    #? analizar esto, parece que el ocupado no se asigna aquí # // ocupado = true porque se le asigna lo ocupado en el evento llega msj
   }
-  else{ #? C3_termina se está desprogramando?
-    #cola_de_eventos$insert(tiempoMaximo*4, "2") #? definir el T_MAX como el tiempo final de la simulación # desprogramar evento
+  else{ 
     C1_ocupado <<- FALSE
   }
 
@@ -406,7 +384,6 @@ C1_termina <- function() {
 
 #evento numero 3
 C2_terminaN1 <- function() {
-  #Carlos
   cola_de_eventos$insert(reloj+20,"7") #Se programa el evento llega_a_C1_de_C2 que corresponde al 7
   mensaje <- cola_msj_C2N1$pop() #Se saca mensaje de la cola de mensajes
   cola_trans_C2_a_C1$insert(mensaje) #se inserta en la cola de transmision 
@@ -425,8 +402,8 @@ C2_terminaN1 <- function() {
   }
 }
 
+#evento numero 9
 C2_terminaN2 <- function() {
-  #Carlos
   cola_de_eventos$insert(reloj+20,"7") #Se programa el evento llega_a_C1_de_C2 que corresponde al 7
   mensaje <- cola_msj_C2N2$pop() #Se saca mensaje de la cola de mensajes
   cola_trans_C2_a_C1$insert(mensaje) #se inserta en la cola de transmision 
@@ -446,11 +423,7 @@ C2_terminaN2 <- function() {
 
 #evento numero 4
 C3_termina <- function() {
-  #Roy
-  # se saca el mensaje
-  #print("antes de pop")
   mensaje = cola_msj_C3$pop()
-  #print("despues de pop")
   # se genera random [0,1]
   r = runif( 1, min = 0, max = 1 )
   if( r < x2 ) # se rechaza
@@ -523,9 +496,8 @@ devuelto_a_C2 <- function() {
   }
 }
 
-#evento #6
+#evento numero 6
 devuelto_a_C3 <- function() {
-  #Roy
   mensaje = cola_trans_C1_a_C3$pop()
   mensaje@tiempo_en_transmision = mensaje@tiempo_en_transmision + 3
   if( identical(FALSE, C3_ocupado) ) # se empieza a procesar mensaje
@@ -546,7 +518,6 @@ devuelto_a_C3 <- function() {
 # evento número 7
 llega_a_C1_de_C2 <- function() {
   # #Aurelio
-  #print("llega_a_C1_de_C2")
   msj <- cola_trans_C2_a_C1$pop()
   msj@tiempo_en_transmision = msj@tiempo_en_transmision+20 # tiempo empleado en enviarse
   
@@ -565,7 +536,6 @@ llega_a_C1_de_C2 <- function() {
 
 #evento numero 8
 llega_a_C1_de_C3 <- function() {
-  #print("llega_a_C1_de_C3")
   mensaje <- cola_trans_C3_a_C1$pop() #Se saca mensaje de la cola de transmision
   mensaje@tiempo_en_transmision <- (mensaje@tiempo_en_transmision + 20) #Se suma el tiempo que se estuvo transmitiendo
   if(identical(FALSE,C1_ocupado)) #Pregunto si el C1 no esta ocupado
@@ -636,6 +606,7 @@ uniforme <- function( num_distribucion ){
   return(x)
 }
 
+#Funciones vacias para usar en el metodo asignar distribuciones a partir del csv
 D1 <- function(...){}
 D2 <- function(...){}
 D3 <- function(...){}
@@ -679,7 +650,7 @@ asignarDistribuciones <- function()
 distribucionPorNombre <- function( nombre )
 {
   switch( nombre,
-    "normal_metodo_directo" = normal_metodo_directo, # cualquier cosa cambiar el nombre
+    "normal_metodo_directo" = normal_metodo_directo, 
     "normal_TLC" = normal_tlc,
     "uniforme" = uniforme,
     "exponencial" = exponencial,
