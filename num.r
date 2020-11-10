@@ -490,11 +490,14 @@ llega_a_C1_de_C3 <- function() {
 
 # FUNCIONES MATEMATICAS PARA LAS DISTRIBUCIONES
 exponencial <- function( num_distribucion ){
+  lambda <- entradaDatos[num_distribucion, 2]
   r = runif(1, min = 0, max = 1)
-  return (-log(1-r)/input[num_distribucion, 2])
+  return (-log(1-r)/lambda)
 }
 
-normal_metodo_directo <- function(media, varianza){
+normal_metodo_directo <- function(num_distribucion){
+   media <- entradaDatos[num_distribucion, 2]
+   varianza <- entradaDatos[num_distribucion, 3]
    sigma = sqrt( varianza ) # desviación estándar = sigma
    r1 = runif(1, min = 0, max = 1)
    r2 = runif(1, min = 0, max = 1)
@@ -505,15 +508,20 @@ normal_metodo_directo <- function(media, varianza){
 }
 
 # se toma k=12 como se sugiere en el libro
-normal_tlc <- function( num_distr ){
+normal_tlc <- function( num_distribucion ){
   r_sum <- 0
+  media <- entradaDatos[num_distribucion, 2]
+  varianza <- entradaDatos[num_distribucion, 3]
   for( i in 1:12 )
     r_sum = r_sum + runif( 1, min = 0, max = 1 )
-  return (sqrt( input[num_distr, 3] )*( r_sum-6 ) + input[num_distr, 2])
+  return (sqrt( varianza )*( r_sum-6 ) + media)
 }
 
-funcion_densidad <- function(k,a,b)
+funcion_densidad <- function(num_distr)
 {
+  k <- entradaDatos[num_distr, 4]
+  a <- entradaDatos[num_distr, 2]
+  b <- entradaDatos[num_distr, 3]
   r = runif(1,min=0,max=1)
   random <- sqrt(r*(k/2) + a^2)
   if(a <= random & random <= b)
@@ -525,7 +533,9 @@ funcion_densidad <- function(k,a,b)
   }
 }
 
-uniforme <- function(a,b){
+uniforme <- function( num_distribucion ){
+  a <- entradaDatos[num_distribucion, 2]
+  b <- entradaDatos[num_distribucion, 3]
   r = runif(1, min = 0, max = 1)
   x = r*(b-a)+a
   return(x)
@@ -539,7 +549,7 @@ D5 <- function(...){}
 D6 <- function(...){}
 
 #funcion encargada de asociar el respectivo id con la funcion correspondiente
-matching <- function(id) 
+asociar <- function(id) 
 {
   switch(id,
         "0" = arr_a_C2(),
@@ -558,21 +568,21 @@ asignarDistribuciones <- function()
   # se iteran las filas del csv
   for( row in 1:6 ) # cómo sacar las filas de la matriz?
   {
-    nombre_distr = input[row,1]
+    nombre_distr = entradaDatos[row,1]
     switch( row,
-      {D1 <<- matchDistributionNames( nombre_distr )},
-      {D2 <<- matchDistributionNames( nombre_distr )},
-      {D3 <<- matchDistributionNames( nombre_distr )},
-      {D4 <<- matchDistributionNames( nombre_distr )},
-      {D5 <<- matchDistributionNames( nombre_distr )},
-      {D6 <<- matchDistributionNames( nombre_distr )})
+      {D1 <<- distribucionPorNombre( nombre_distr )},
+      {D2 <<- distribucionPorNombre( nombre_distr )},
+      {D3 <<- distribucionPorNombre( nombre_distr )},
+      {D4 <<- distribucionPorNombre( nombre_distr )},
+      {D5 <<- distribucionPorNombre( nombre_distr )},
+      {D6 <<- distribucionPorNombre( nombre_distr )})
   }
 }
 
 # asocia el nombre ingresado por el usuario con la función
-matchDistributionNames <- function( name )
+distribucionPorNombre <- function( nombre )
 {
-  switch( name,
+  switch( nombre,
     "normal_metodo_directo" = normal_metodo_directo, # cualquier cosa cambiar el nombre
     "normal_TLC" = normal_tlc,
     "uniforme" = uniforme,
