@@ -127,6 +127,9 @@ simular <- function() {
   total_de_tiempo = 0 
   total_devoluciones = 0
 
+  total_de_tiempo_trans = 0
+  total_de_tiempo_cola = 0
+
   for(i in 1:repeticiones) #el 10 indica cuantas veces quiero que se repita las simulaciones
   {
     # se programan los primeros eventos
@@ -136,15 +139,8 @@ simular <- function() {
     #print(tiempoMaximo)
     while (reloj < tiempoMaximo)
     {
-      #print("Reloj")
-      #print(reloj)
-      
       siguiente <- cola_de_eventos$pop()
       reloj <<- siguiente@tiempo
-      #print("Sig. Evento")
-      print(siguiente@evento)
-      #print("Sig. Tiempo")
-      #print(siguiente@tiempo)
       asociar(siguiente@evento)
     }
     #Sacar y guardar las estadisticas por simulacion 
@@ -156,12 +152,13 @@ simular <- function() {
     total_destinos = 0
     total_de_tiempo_trans_por_simulacion = 0
     total_de_tiempo_cola_por_simulacion = 0
+    total_de_tiempo_procesado = 0
 
     while(identical(FALSE,cola_msj_destino$empty()))
     {
       mensaje = cola_msj_destino$pop()
       total_c1_destinos = total_c1_destinos + mensaje@tiempo_C1
-      if(mensaje@origen == 3)
+      if(mensaje@PC_origen == 3)
       {
           total_c3_destinos = total_c3_destinos + mensaje@tiempo_Cx
       }
@@ -186,22 +183,23 @@ simular <- function() {
       #estadisticas generales de mensaje que fueron rechazados en el sistema
       total_de_tiempo_procesado = total_de_tiempo_procesado + mensaje@tiempo_C1 + mensaje@tiempo_Cx #tiempo total de mensaje en el sistema proc.
       total_devoluciones = total_devoluciones + mensaje@num_total_devuelto
-
+      #print(mensaje@num_total_devuelto)
       total_rechazados = total_rechazados + 1
     }
     #Estadisticas por corrida de simulacion
-    print("-----Tiempo ocupacion de cada procesador-----")
-    cat("C1: ", (total_c1_destinos+total_c1_rechazo)/(total_c1_destinos+total_c1_rechazo+total_c3_destinos+total_c3_rechazo+total+C2_N1_trabajo+C2_N2_trabajo+total_de_tiempo_trans_por_simulacion+total_de_tiempo_cola_por_simulacion), "%\n")
-    cat("C2_N1: ", C2_N1_trabajo/(total_c1_destinos+total_c1_rechazo+total_c3_destinos+total_c3_rechazo+total+C2_N1_trabajo+C2_N2_trabajo+total_de_tiempo_trans_por_simulacion+total_de_tiempo_cola_por_simulacion), "%\n")
-    cat("C2_N2: ", C2_N2_trabajo/(total_c1_destinos+total_c1_rechazo+total_c3_destinos+total_c3_rechazo+total+C2_N1_trabajo+C2_N2_trabajo+total_de_tiempo_trans_por_simulacion+total_de_tiempo_cola_por_simulacion), "%\n")
-    cat("C3: ", (total_c3_destinos+total_c3_rechazo)/(total_c1_destinos+total_c1_rechazo+total_c3_destinos+total_c3_rechazo+total+C2_N1_trabajo+C2_N2_trabajo+total_de_tiempo_trans_por_simulacion+total_de_tiempo_cola_por_simulacion), "%\n")
+    cat("CORRIDA NUMERO ", i, "\n")
+    print("-----Porcentaje del tiempo de ocupacion de cada procesador-----")
+    cat("C1: ", (total_c1_destinos+total_c1_rechazo)/(total_c1_destinos+total_c1_rechazo+total_c3_destinos+total_c3_rechazo+C2_N1_trabajo+C2_N2_trabajo+total_de_tiempo_trans_por_simulacion+total_de_tiempo_cola_por_simulacion), "\n")
+    cat("C2_N1: ", C2_N1_trabajo/(total_c1_destinos+total_c1_rechazo+total_c3_destinos+total_c3_rechazo+C2_N1_trabajo+C2_N2_trabajo+total_de_tiempo_trans_por_simulacion+total_de_tiempo_cola_por_simulacion), "\n")
+    cat("C2_N2: ", C2_N2_trabajo/(total_c1_destinos+total_c1_rechazo+total_c3_destinos+total_c3_rechazo+C2_N1_trabajo+C2_N2_trabajo+total_de_tiempo_trans_por_simulacion+total_de_tiempo_cola_por_simulacion), "\n")
+    cat("C3: ", (total_c3_destinos+total_c3_rechazo)/(total_c1_destinos+total_c1_rechazo+total_c3_destinos+total_c3_rechazo+C2_N1_trabajo+C2_N2_trabajo+total_de_tiempo_trans_por_simulacion+total_de_tiempo_cola_por_simulacion), "\n")
 
-    print("-----Tiempo ocupacion de procesadores C1 y C3 en msj rechazados-----")
-    cat("C1: ", total_c1_rechazo/(total_c1_destinos+total_c1_rechazo+total_c3_destinos+total_c3_rechazo+total+C2_N1_trabajo+C2_N2_trabajo+total_de_tiempo_trans_por_simulacion+total_de_tiempo_cola_por_simulacion), "%\n")
-    cat("C3: ", total_c3_rechazo/(total_c1_destinos+total_c1_rechazo+total_c3_destinos+total_c3_rechazo+total+C2_N1_trabajo+C2_N2_trabajo+total_de_tiempo_trans_por_simulacion+total_de_tiempo_cola_por_simulacion), "%\n")
+    print("-----Porcentaje del tiempo ocupacion de procesadores C1 y C3 en msj rechazados-----")
+    cat("C1: ", total_c1_rechazo/(total_c1_destinos+total_c1_rechazo+total_c3_destinos+total_c3_rechazo+C2_N1_trabajo+C2_N2_trabajo+total_de_tiempo_trans_por_simulacion+total_de_tiempo_cola_por_simulacion), "\n")
+    cat("C3: ", total_c3_rechazo/(total_c1_destinos+total_c1_rechazo+total_c3_destinos+total_c3_rechazo+C2_N1_trabajo+C2_N2_trabajo+total_de_tiempo_trans_por_simulacion+total_de_tiempo_cola_por_simulacion), "\n")
 
     print("-----Porcentaje de mensajes rechazados-----")
-    cat("Porcentaje: ", total_rechazados/(total_rechazados+total_destinos) , "%\n")
+    cat("Porcentaje: ", total_rechazados/(total_rechazados+total_destinos) , "\n")
 
     #Calculo para estadisticas generales
     total_de_mensajes_general = total_rechazados+total_destinos #Unicamente tomando en cuenta mensajes que salieron del sistema
@@ -210,7 +208,8 @@ simular <- function() {
     #inicializacion para la siguiente simulacion 
     cola_de_eventos$clear()
     cola_msj_C1$clear()
-    cola_msj_C2$clear()
+    cola_msj_C2N1$clear()
+    cola_msj_C2N2$clear()
     cola_msj_C3$clear()
     cola_trans_C1_a_C2$clear()
     cola_trans_C1_a_C3$clear()
@@ -228,20 +227,21 @@ simular <- function() {
     C2_N2_trabajo <<- 0
   }
   #Estadisticas generales de la simulacion
+  print("ESTADISTICAS GENERALES")
   print("-----Tiempo promedio de mensajes en el sistema-----")
-  cat("Tiempo promedio: ", (total_de_tiempo_trans+total_de_tiempo_procesado+total_de_tiempo_cola)/total_de_mensajes_general, "\n")
+  cat("Tiempo promedio: ", (total_de_tiempo_trans+total_de_tiempo_procesado+total_de_tiempo_cola)/total_de_mensajes_general, "segundos.\n")
 
   print("-----Cantidad promedio de devoluciones-----")
   cat("Cantidad promedio: ", total_devoluciones/total_de_mensajes_general, "\n")
 
   print("-----Tiempo promedio de mensajes en colas-----")
-  cat("Tiempo promedio: ", total_de_tiempo_cola/total_de_mensajes_general, "\n")
+  cat("Tiempo promedio: ", total_de_tiempo_cola/total_de_mensajes_general, "segundos.\n")
 
   print("-----Tiempo promedio de mensajes en transmision-----")
-  cat("Tiempo promedio: ", total_de_tiempo_trans/total_de_mensajes_general, "\n")
+  cat("Tiempo promedio: ", total_de_tiempo_trans/total_de_mensajes_general, "segundos.\n")
 
-  print("-----Tiempo promedio de mensajes en procesamiento-----")
-  cat("Porcentaje de tiempo : ", total_de_tiempo_procesado/(total_de_tiempo_procesado+total_de_tiempo_cola+tiempo_en_transmision), "%\n")
+  print("-----Porcentaje del tiempo de mensajes siendo procesados-----")
+  cat("Porcentaje de tiempo : ", total_de_tiempo_procesado/(total_de_tiempo_procesado+total_de_tiempo_cola+total_de_tiempo_trans), "\n")
 }
 
 # evento número 0
@@ -368,9 +368,9 @@ C1_termina <- function() {
       cola_msj_destino$insert(msj)
     }
     else{
+      msj@num_total_devuelto = msj@num_total_devuelto+1
       cola_trans_C1_a_C2$insert(msj) # meter en cola devolución a C2
       cola_de_eventos$insert(reloj+3,"5") # se programa el evento de devolución el mensaje y dura 3 segundos
-      msj@num_total_devuelto = msj@num_total_devuelto+1
     }
   }
   else{ # si es la PC 3
@@ -378,9 +378,9 @@ C1_termina <- function() {
       cola_msj_destino$insert(msj)
     }
     else{
+      msj@num_total_devuelto = msj@num_total_devuelto+1
       cola_trans_C1_a_C3$insert(msj) # meter en cola devolución a C3
       cola_de_eventos$insert(reloj+3,"6")
-      msj@num_total_devuelto = msj@num_total_devuelto+1
     }
   }
 
@@ -496,7 +496,7 @@ devuelto_a_C2 <- function() {
       cola_de_eventos$insert(reloj+d2,"3") #Se programa el evento C2 termina que corresponde al 3
       mensaje@tiempo_Cx <- mensaje@tiempo_Cx + d2 #Se agrega a la estructura el tiempo que va a durar procesandose
       C2_N1_trabajo <<- C2_N1_trabajo + d2 #Se agrega el tiempo trabajado al nucleo correspondiente
-      cola_msj_C2$insertN1(mensaje) #Se agrega a la cola de mensajes para que C2 termina lo pueda acceder
+      cola_msj_C2N1$insert(mensaje) #Se agrega a la cola de mensajes para que C2 termina lo pueda acceder
     }
     else #Si que no esta ocupado es el nucleo 2
     {
@@ -519,7 +519,7 @@ devuelto_a_C2 <- function() {
      {
        cola_msj_C2N2$insert(mensaje) #Se agrega a la cola de mensajes para que C2 termina lo pueda acceder
      }
-     mensaje@inicio_en_cola <- reloj #Se empieza a tomar el tiempo en cola
+     mensaje@llegada_a_cola <- reloj #Se empieza a tomar el tiempo en cola
   }
 }
 

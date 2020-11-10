@@ -1,10 +1,11 @@
-normal_metodo_directo,media,varianza,,,,,
-normal_TLC,media,varianza,,,,,
-uniforme,a,b,,,,,
-exponencial,lambda,,,,,,
-func_densidad,a,b,k,x,,,
-x1, 0.# - 1 ,,,,,,
-x2, 0.# - 1 ,,,,,,
-x3, 0.# - 1 ,,,,,,
-duracion_simulacion,integer,,,,,,
-cantidad_corridas_simulacion,integer,,,,,,
+normal_metodo_directo,15,1
+uniforme,12,25
+normal_TLC,19,1
+func_densidad,4,8,0.0416666
+exponencial,0.25
+exponencial,0.16666
+x1, 0.2
+x2, 0.8
+x3, 0.5
+duracion_simulacion,200
+cantidad_corridas_simulacion,5
