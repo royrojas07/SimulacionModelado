@@ -269,31 +269,26 @@ C2_termina <- function() {
   #Carlos
   cola_de_eventos$insert(reloj+20,"7") #Se programa el evento llega_a_C1_de_C2 que corresponde al 7
   mensaje <- cola_msj_C2$pop() #Se saca mensaje de la cola de mensajes
-  mensaje@tiempo_en_cola <- mensaje@tiempo_en_cola + reloj - mensaje@llegada_a_cola #se obtiene el tiempo que estuvo en cola                           
   cola_trans_C2_a_C1$insert(mensaje) #se inserta en la cola de transmision 
   if(identical(FALSE,cola_msj_C2$empty()) & C2_N1_ocupado) #Si la cola no esta vacia y el nucleo se le asigno ocupacion en el evento devuelto C2
   {
+    d2 <- D2(2) #se obtiene el random de la distribucion
     nuevo_mensaje <- cola_msj_C2$pop() #Se casa un nuevo mensaje de la cola
-    if(nuevo_mensaje@en_cola) # Se verifica si de verdad estaba en la cola 
-    {
-      nuevo_mensaje@tiempo_en_cola <- nuevo_mensaje@tiempo_en_cola + reloj - nuevo_mensaje@llegada_a_cola # Si estaba en la cola se obtiene el tiempo que estuvo ahi
-    }
-    nuevo_mensaje@tiempo_Cx <- nuevo_mensaje@tiempo_Cx + D2() #Se le agrega el tiempo de procesamiento que va a tener
+    nuevo_mensaje@tiempo_en_cola <- nuevo_mensaje@tiempo_en_cola + reloj - nuevo_mensaje@llegada_a_cola # Si estaba en la cola se obtiene el tiempo que estuvo ahi
+    nuevo_mensaje@tiempo_Cx <- nuevo_mensaje@tiempo_Cx + d2 #Se le agrega el tiempo de procesamiento que va a tener
     cola_msj_C2$insert(nuevo_mensaje,0) #Se inserta en el head de la cola
-    cola_de_eventos$insert(reloj+D2(),"3") #Se program este evento asi mismo
+    cola_de_eventos$insert(reloj+d2,"3") #Se program este evento asi mismo
   }
   else{ #Entra aqui si la cola esta vacia o N1 no ocupado
     C2_N1_ocupado = FALSE 
   }
   if(identical(FALSE,cola_msj_C2$empty()) & C2_N2_ocupado){ #Si la cola no esta vacia y el nucleo se le asigno ocupacion en el evento devuelto C2
+    d3 <- D3(3) #se obtiene el random de la distribucion
     nuevo_mensaje <- cola_msj_C2$pop() #Se casa un nuevo mensaje de la cola
-    if(nuevo_mensaje@en_cola)  # Se verifica si de verdad estaba en la cola 
-    {
-      nuevo_mensaje@tiempo_en_cola <- nuevo_mensaje@tiempo_en_cola + reloj - nuevo_mensaje@llegada_a_cola # Si estaba en la cola se obtiene el tiempo que estuvo ahi
-    }
-    nuevo_mensaje@tiempo_Cx <- nuevo_mensaje@tiempo_Cx + D3()  #Se le agrega el tiempo de procesamiento que va a tener
+    nuevo_mensaje@tiempo_en_cola <- nuevo_mensaje@tiempo_en_cola + reloj - nuevo_mensaje@llegada_a_cola # Si estaba en la cola se obtiene el tiempo que estuvo ahi
+    nuevo_mensaje@tiempo_Cx <- nuevo_mensaje@tiempo_Cx + d3  #Se le agrega el tiempo de procesamiento que va a tener
     cola_msj_C2$insert(nuevo_mensaje,0) #Se inserta en el head de la cola
-		cola_de_eventos$insert(reloj+D3(),"3")  #Se program este evento asi mismo
+		cola_de_eventos$insert(reloj+d3,"3")  #Se programa este evento asi mismo
   }
   else{
     C2_N2_ocupado = FALSE
@@ -345,17 +340,19 @@ devuelto_a_C2 <- function() {
   {
     if(identical(FALSE,C2_N1_ocupado) ) #Pregunto si no esta ocupado el nucleo 1
     {
+      d2 <- D2(2)
       C2_N1_ocupado <- TRUE #Ahora esta ocupado
-      cola_de_eventos$insert(reloj+D2(),"3") #Se programa el evento C2 termina que corresponde al 3
-      mensaje@tiempo_Cx <- mensaje@tiempo_Cx + D2() #Se agrega a la estructura el tiempo que va a durar procesandose
+      cola_de_eventos$insert(reloj+d2,"3") #Se programa el evento C2 termina que corresponde al 3
+      mensaje@tiempo_Cx <- mensaje@tiempo_Cx + d2 #Se agrega a la estructura el tiempo que va a durar procesandose
       cola_msj_C2(mensaje) #Se agrega a la cola de mensajes para que C2 termina lo pueda acceder
       mensaje@en_cola <- FALSE #Se pone en falso porque no va a estar en la cola, solo se agrega para que C2 termina lo pueda acceder
     }
     else #Si que no esta ocupado es el nucleo 2
     {
+      d3 <- D3(3)
       C2_N2_ocupado <- TRUE  #Ahora esta ocupado
-		  cola_de_eventos$insert(reloj+D3(),"3") #Se programa el evento C2 termina que corresponde al 3
-      mensaje@tiempo_Cx <- mensaje@tiempo_Cx + D3() #tiempo que dura procesandose
+		  cola_de_eventos$insert(reloj+d3,"3") #Se programa el evento C2 termina que corresponde al 3
+      mensaje@tiempo_Cx <- mensaje@tiempo_Cx + d3 #tiempo que dura procesandose
       cola_msj_C2(mensaje) #Se agrega a la cola de mensajes para que C2 termina lo pueda acceder
       mensaje@en_cola <- FALSE  #Se pone en falso porque no va a estar en la cola, solo se agrega para que C2 termina lo pueda acceder
     }
@@ -409,11 +406,12 @@ llega_a_C1_de_C3 <- function() {
   mensaje@tiempo_en_transmision <- mensaje@tiempo_en_transmision + 20 #Se suma el tiempo que se estuvo transmitiendo
   if(identical(FALSE,C1_ocupado)) #Pregunto si el C1 no esta ocupado
   {
-     C1_ocupado <- TRUE #Ahora esta ocupado
-     cola_de_eventos$insert(reloj+D6,"2") #Se programa el evento C1 termina 
-     mensaje$tiempo_C1 <- mensaje$tiempo_C1+D6() #Tiempo que duraria procesandose
-     cola_msj_C1$insert(mensaje) #Se inserta en la cola para que C1 termina lo pueda acceder
-     mensaje$en_cola <- FALSE #Se pone en falso porque en verdad no esta en cola es solo para el acceso en C1 termina
+    d6 = D6(6)
+    C1_ocupado <- TRUE #Ahora esta ocupado
+    cola_de_eventos$insert(reloj+d6,"2") #Se programa el evento C1 termina 
+    mensaje$tiempo_C1 <- mensaje$tiempo_C1+d6 #Tiempo que duraria procesandose
+    cola_msj_C1$insert(mensaje) #Se inserta en la cola para que C1 termina lo pueda acceder
+    mensaje$en_cola <- FALSE #Se pone en falso porque en verdad no esta en cola es solo para el acceso en C1 termina
   }
   else 
   {
