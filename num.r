@@ -116,6 +116,8 @@ simular <- function() {
   total_de_tiempo_trans = 0
   total_de_tiempo_cola = 0
 
+  total_proc_ocupados = 0
+
   for(i in 1:repeticiones) #el 10 indica cuantas veces quiero que se repita las simulaciones
   {
     # se programan los primeros eventos
@@ -169,7 +171,6 @@ simular <- function() {
       #estadisticas generales de mensaje que fueron rechazados en el sistema
       total_de_tiempo_procesado = total_de_tiempo_procesado + mensaje@tiempo_C1 + mensaje@tiempo_Cx #tiempo total de mensaje en el sistema proc.
       total_devoluciones = total_devoluciones + mensaje@num_total_devuelto
-      #print(mensaje@num_total_devuelto)
       total_rechazados = total_rechazados + 1
     }
 
@@ -192,7 +193,8 @@ simular <- function() {
     total_de_mensajes_general = total_rechazados+total_destinos #Unicamente tomando en cuenta mensajes que salieron del sistema
     total_de_tiempo_trans = total_de_tiempo_trans + total_de_tiempo_trans_por_simulacion #tiempo total de mensaje en el sistema en trans 
     total_de_tiempo_cola = total_de_tiempo_cola + total_de_tiempo_cola_por_simulacion  #tiempo total de mensaje en el sistema en cola
-    
+    total_proc_ocupados = total_proc_ocupados + (total_c1_destinos+total_c1_rechazo)/(total_c1_destinos+total_c1_rechazo+total_c3_destinos+total_c3_rechazo+C2_N1_trabajo+C2_N2_trabajo+total_de_tiempo_trans_por_simulacion+total_de_tiempo_cola_por_simulacion)
+
     reiniciar_pos_simulacion() #inicializacion para la siguiente simulacion 
   }
   #Estadisticas generales de la simulacion
@@ -211,6 +213,9 @@ simular <- function() {
 
   print("-----Porcentaje del tiempo de mensajes siendo procesados-----")
   cat("Porcentaje de tiempo : ", total_de_tiempo_procesado/(total_de_tiempo_procesado+total_de_tiempo_cola+total_de_tiempo_trans), "\n")
+
+  print("-----Porcentaje del tiempo de ocupacion de cada procesador de manera GENERAL-----")
+  cat("C1: ", total_proc_ocupados/repeticiones, "\n")
 }
 
 reiniciar_pos_simulacion <- function() 
