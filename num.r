@@ -165,7 +165,7 @@ simular <- function() {
 
       total_destinos = total_destinos + 1
     }
-    tiemposPromedioPorMensaje[0][i] = (total_de_tiempo_procesado_por_simulacion + total_de_tiempo_cola_por_simulacion + total_de_tiempo_trans_por_simulacion)/total_destinos
+    tiemposPromedioPorMensaje[1][i] = (total_de_tiempo_procesado_por_simulacion + total_de_tiempo_cola_por_simulacion + total_de_tiempo_trans_por_simulacion)/total_destinos
     while(identical(FALSE,cola_msj_rechazados$empty()))
     {
       mensaje = cola_msj_rechazados$pop()
@@ -180,8 +180,8 @@ simular <- function() {
       total_devoluciones = total_devoluciones + mensaje@num_total_devuelto
       total_rechazados = total_rechazados + 1
     }
-    tiemposPromedioPorMensaje[1][i] = (total_de_tiempo_procesado_por_simulacion + total_de_tiempo_cola_por_simulacion + total_de_tiempo_trans_por_simulacion - tiemposPromedioPorMensaje[0][i])/total_rechazados
-    tiemposPromedioPorMensaje[2][i] = tiemposPromedioPorMensaje[0][i] + tiemposPromedioPorMensaje[1][i]
+    tiemposPromedioPorMensaje[2][i] = (total_de_tiempo_procesado_por_simulacion + total_de_tiempo_cola_por_simulacion + total_de_tiempo_trans_por_simulacion - tiemposPromedioPorMensaje[1][i]*total_destinos)/total_rechazados
+    tiemposPromedioPorMensaje[3][i] = tiemposPromedioPorMensaje[1][i] + tiemposPromedioPorMensaje[2][i]
 
     #Estadisticas por corrida de simulacion
     cat("CORRIDA NUMERO ", i, "\n")
@@ -234,8 +234,12 @@ simular <- function() {
   
   #t_msj_destino <- array(0, dim=c(1,repeticiones,1))
   # asignar según indice i de la repetición
-
-
+  print("-----Intervalo de confianza para mensajes enviados a su destino-----")
+  intervalo_de_confianza( tiemposPromedioPorMensaje, repeticiones, 0 )
+  print("-----Intervalo de confianza para mensajes rechazados-----")
+  intervalo_de_confianza( tiemposPromedioPorMensaje, repeticiones, 1 )
+  print("-----Intervalo de confianza para mensajes en general-----")
+  intervalo_de_confianza( tiemposPromedioPorMensaje, repeticiones, 2 )
 }
 
 reiniciar_pos_simulacion <- function() 
@@ -265,18 +269,19 @@ intervalo_de_confianza <- function( tiemposPromedioPorMensaje, repeticiones, tip
 {
   acumulador <- 0
   for( i in 1:repeticiones ){
-    acumulador <- acumulador + tiemposPromedioPorMensaje[i]
+    acumulador <- acumulador + tiemposPromedioPorMensaje[tipo][i]
   }
   media_muestral <- acumulador/repeticiones
 
-  cat("media_muestral: ", media_muestral, "\n")
+  #cat("media_muestral: ", media_muestral, "\n")
+  varianza_muestral = 0
   # calcular varianza muestral
-  varianza_muestral <- var(t_msj_destino, na.rm = FALSE)
-  print( var(t_msj_destino, na.rm = FALSE) )
+  for( i in 1:repeticiones ){ # fórmula notable
+      varianza_muestral = varianza_muestral + (tiemposPromedioPorMensaje[tipo][i]-media_muestral)^2
+  }
+  varianza_muestral = varianza_muestral/grados_libertad
 
-  cat("varianza_muestral: ", varianza_muestral, "\n")
-  
-  print("-----Intervalo de confianza para mensajes enviados a su destino-----")
+  #cat("varianza_muestral: ", varianza_muestral, "\n")
   cat("Intervalo: [", media_muestral - 2.26 * (varianza_muestral/repeticiones)^(1/2),", ", media_muestral + 2.26 * (varianza_muestral/repeticiones)^(1/2), "]\n")
 }
 
