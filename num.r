@@ -116,7 +116,10 @@ simular <- function() {
   total_de_tiempo_trans = 0
   total_de_tiempo_cola = 0
 
-  total_proc_ocupados = 0
+  total_proc_C1_ocupados = 0
+  total_proc_C2N1_ocupados = 0
+  total_proc_C2N2_ocupados = 0
+  total_proc_C3_ocupados = 0
 
   for(i in 1:repeticiones) #el 10 indica cuantas veces quiero que se repita las simulaciones
   {
@@ -193,7 +196,10 @@ simular <- function() {
     total_de_mensajes_general = total_rechazados+total_destinos #Unicamente tomando en cuenta mensajes que salieron del sistema
     total_de_tiempo_trans = total_de_tiempo_trans + total_de_tiempo_trans_por_simulacion #tiempo total de mensaje en el sistema en trans 
     total_de_tiempo_cola = total_de_tiempo_cola + total_de_tiempo_cola_por_simulacion  #tiempo total de mensaje en el sistema en cola
-    total_proc_ocupados = total_proc_ocupados + (total_c1_destinos+total_c1_rechazo)/(total_c1_destinos+total_c1_rechazo+total_c3_destinos+total_c3_rechazo+C2_N1_trabajo+C2_N2_trabajo+total_de_tiempo_trans_por_simulacion+total_de_tiempo_cola_por_simulacion)
+    total_proc_C1_ocupados = total_proc_ocupados + (total_c1_destinos+total_c1_rechazo)/(total_c1_destinos+total_c1_rechazo+total_c3_destinos+total_c3_rechazo+C2_N1_trabajo+C2_N2_trabajo+total_de_tiempo_trans_por_simulacion+total_de_tiempo_cola_por_simulacion)
+    total_proc_C2N1_ocupados = C2_N1_trabajo/(total_c1_destinos+total_c1_rechazo+total_c3_destinos+total_c3_rechazo+C2_N1_trabajo+C2_N2_trabajo+total_de_tiempo_trans_por_simulacion+total_de_tiempo_cola_por_simulacion)
+    total_proc_C2N2_ocupados = C2_N2_trabajo/(total_c1_destinos+total_c1_rechazo+total_c3_destinos+total_c3_rechazo+C2_N1_trabajo+C2_N2_trabajo+total_de_tiempo_trans_por_simulacion+total_de_tiempo_cola_por_simulacion)
+    total_proc_C3_ocupados = (total_c3_destinos+total_c3_rechazo)/(total_c1_destinos+total_c1_rechazo+total_c3_destinos+total_c3_rechazo+C2_N1_trabajo+C2_N2_trabajo+total_de_tiempo_trans_por_simulacion+total_de_tiempo_cola_por_simulacion)
 
     reiniciar_pos_simulacion() #inicializacion para la siguiente simulacion 
   }
@@ -215,7 +221,10 @@ simular <- function() {
   cat("Porcentaje de tiempo : ", total_de_tiempo_procesado/(total_de_tiempo_procesado+total_de_tiempo_cola+total_de_tiempo_trans), "\n")
 
   print("-----Porcentaje del tiempo de ocupacion de cada procesador de manera GENERAL-----")
-  cat("C1: ", total_proc_ocupados/repeticiones, "\n")
+  cat("C1: ", total_proc_C1_ocupados/repeticiones, "\n")
+  cat("C2_N1: ", total_proc_C2N1_ocupados/repeticiones, "\n")
+  cat("C2_N2: ", total_proc_C2N2_ocupados/repeticiones, "\n")
+  cat("C3: ", total_proc_C3_ocupados/repeticiones, "\n")
 }
 
 reiniciar_pos_simulacion <- function() 
