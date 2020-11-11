@@ -225,6 +225,10 @@ simular <- function() {
   cat("C2_N1: ", total_proc_C2N1_ocupados/repeticiones, "\n")
   cat("C2_N2: ", total_proc_C2N2_ocupados/repeticiones, "\n")
   cat("C3: ", total_proc_C3_ocupados/repeticiones, "\n")
+
+  print("-----Intervalo de confianza-----")
+  cat("Intervalo: [", media_muestral - 2.26 * (varianza_muestral/repeticiones)^(1/2),", ", media_muestral + 2.26 * (varianza_muestral/repeticiones)^(1/2), "]\n")
+
 }
 
 reiniciar_pos_simulacion <- function() 
