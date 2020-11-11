@@ -234,7 +234,42 @@ simular <- function() {
 
   print("-----Intervalo de confianza-----")
   cat("Intervalo: [", media_muestral - 2.26 * (varianza_muestral/repeticiones)^(1/2),", ", media_muestral + 2.26 * (varianza_muestral/repeticiones)^(1/2), "]\n")
+  
+  #t_msj_destino <- array(0, dim=c(1,repeticiones,1))
+# asignar según indice i de la repetición
 
+# calcular la media
+print("Array")
+
+# tiempo promedio de un mensaje en el sistema, de cada corrida de simulación
+for( i in 1:repeticiones ){
+    print( t_msj_destino[i] )
+}
+
+acumulador <- 0
+for( i in 1:repeticiones ){
+    acumulador <- acumulador + t_msj_destino[i]
+}
+media_muestral <- acumulador/repeticiones
+
+cat("media_muestral: ", media_muestral, "\n")
+
+
+# calcular varianza muestral
+varianza_muestral <- 0
+#grados_libertad <- repeticiones-1
+
+#for( i in 1:repeticiones ){#fórmula notable
+#    varianza_muestral = t_msj_destino[i]^2
+#    varianza_muestral = varianza_muestral - (2*t_msj_destino[i]*media_muestral)
+#    varianza_muestral = varianza_muestral + (media_muestral^2)
+#}
+#varianza_muestral = varianza_muestral/grados_libertad
+#print(varianza_muestral)
+print( var(t_msj_destino, na.rm = FALSE) )
+
+cat("varianza_muestral: ", varianza_muestral, "\n")
+  
 }
 
 reiniciar_pos_simulacion <- function() 
