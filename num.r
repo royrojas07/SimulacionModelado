@@ -97,7 +97,6 @@ C2_N2_trabajo <<- 0
 
 tiempoMaximo <<- 0
 
-
 entradaDatos = read.csv( "input.csv", header=FALSE )
 
 simular <- function() {
@@ -121,6 +120,8 @@ simular <- function() {
   total_proc_C2N2_ocupados = 0
   total_proc_C3_ocupados = 0
 
+  tiemposPromedioPorMensaje <- array(0, dim=c(3,repeticiones,1))
+
   for(i in 1:repeticiones) #el 10 indica cuantas veces quiero que se repita las simulaciones
   {
     # se programan los primeros eventos
@@ -143,6 +144,7 @@ simular <- function() {
     total_destinos = 0
     total_de_tiempo_trans_por_simulacion = 0
     total_de_tiempo_cola_por_simulacion = 0
+    total_de_tiempo_procesado_por_simulacion = 0
     total_de_tiempo_procesado = 0
 
     while(identical(FALSE,cola_msj_destino$empty()))
@@ -155,6 +157,7 @@ simular <- function() {
       }
       total_de_tiempo_trans_por_simulacion = total_de_tiempo_trans_por_simulacion + mensaje@tiempo_en_transmision #tiempo total de mensaje en el sistema en trans por simulacion
       total_de_tiempo_cola_por_simulacion = total_de_tiempo_cola_por_simulacion + mensaje@tiempo_en_cola  #tiempo total de mensaje en el sistema en cola por simulacion
+      total_de_tiempo_procesado_por_simulacion = total_de_tiempo_procesado_por_simulacion + mensaje@tiempo_C1 + mensaje@tiempo_Cx
 
       #estadisticas generales de mensaje que fueron al destino en el sistema
       total_de_tiempo_procesado = total_de_tiempo_procesado + mensaje@tiempo_C1 + mensaje@tiempo_Cx #tiempo total de mensaje en el sistema proc.
@@ -162,25 +165,28 @@ simular <- function() {
 
       total_destinos = total_destinos + 1
     }
-
-     while(identical(FALSE,cola_msj_rechazados$empty()))
+    tiemposPromedioPorMensaje[0][i] = (total_de_tiempo_procesado_por_simulacion + total_de_tiempo_cola_por_simulacion + total_de_tiempo_trans_por_simulacion)/total_destinos
+    while(identical(FALSE,cola_msj_rechazados$empty()))
     {
       mensaje = cola_msj_rechazados$pop()
       total_c1_rechazo = total_c1_rechazo + mensaje@tiempo_C1
       total_c3_rechazo = total_c3_rechazo + mensaje@tiempo_Cx
       total_de_tiempo_trans_por_simulacion = total_de_tiempo_trans_por_simulacion + mensaje@tiempo_en_transmision #tiempo total de mensaje en el sistema en trans por simulacion
       total_de_tiempo_cola_por_simulacion = total_de_tiempo_cola_por_simulacion + mensaje@tiempo_en_cola  #tiempo total de mensaje en el sistema en cola por simulacion
+      total_de_tiempo_procesado_por_simulacion = total_de_tiempo_procesado_por_simulacion + mensaje@tiempo_C1 + mensaje@tiempo_Cx
 
       #estadisticas generales de mensaje que fueron rechazados en el sistema
       total_de_tiempo_procesado = total_de_tiempo_procesado + mensaje@tiempo_C1 + mensaje@tiempo_Cx #tiempo total de mensaje en el sistema proc.
       total_devoluciones = total_devoluciones + mensaje@num_total_devuelto
       total_rechazados = total_rechazados + 1
     }
+    tiemposPromedioPorMensaje[1][i] = (total_de_tiempo_procesado_por_simulacion + total_de_tiempo_cola_por_simulacion + total_de_tiempo_trans_por_simulacion - tiemposPromedioPorMensaje[0][i])/total_rechazados
+    tiemposPromedioPorMensaje[2][i] = tiemposPromedioPorMensaje[0][i] + tiemposPromedioPorMensaje[1][i]
 
     #Estadisticas por corrida de simulacion
     cat("CORRIDA NUMERO ", i, "\n")
     print("-----Porcentaje del tiempo de ocupacion de cada procesador-----")
-    cat("C1: ", (total_c1_destinos+total_c1_rechazo)/(total_c1_destinos+total_c1_rechazo+total_c3_destinos+total_c3_rechazo+C2_N1_trabajo+C2_N2_trabajo+total_de_tiempo_trans_por_simulacion+total_de_tiempo_cola_por_simulacion), "\n")
+    cat("C1: ", (total_c1_destinos+total_c1_rechazo)/(total_de_tiempo_trans_por_simulacion+total_de_tiempo_cola_por_simulacion+total_de_tiempo_procesado_por_simulacion), "\n")
     cat("C2_N1: ", C2_N1_trabajo/(total_c1_destinos+total_c1_rechazo+total_c3_destinos+total_c3_rechazo+C2_N1_trabajo+C2_N2_trabajo+total_de_tiempo_trans_por_simulacion+total_de_tiempo_cola_por_simulacion), "\n")
     cat("C2_N2: ", C2_N2_trabajo/(total_c1_destinos+total_c1_rechazo+total_c3_destinos+total_c3_rechazo+C2_N1_trabajo+C2_N2_trabajo+total_de_tiempo_trans_por_simulacion+total_de_tiempo_cola_por_simulacion), "\n")
     cat("C3: ", (total_c3_destinos+total_c3_rechazo)/(total_c1_destinos+total_c1_rechazo+total_c3_destinos+total_c3_rechazo+C2_N1_trabajo+C2_N2_trabajo+total_de_tiempo_trans_por_simulacion+total_de_tiempo_cola_por_simulacion), "\n")
