@@ -180,14 +180,14 @@ simular <- function() {
     #Estadisticas por corrida de simulacion
     cat("CORRIDA NUMERO ", i, "\n")
     print("-----Porcentaje del tiempo de ocupacion de cada procesador-----")
-    cat("C1: ", (total_c1_destinos+total_c1_rechazo)/(total_c1_destinos+total_c1_rechazo+total_c3_destinos+total_c3_rechazo+C2_N1_trabajo+C2_N2_trabajo+total_de_tiempo_trans_por_simulacion+total_de_tiempo_cola_por_simulacion), "\n")
-    cat("C2_N1: ", C2_N1_trabajo/(total_c1_destinos+total_c1_rechazo+total_c3_destinos+total_c3_rechazo+C2_N1_trabajo+C2_N2_trabajo+total_de_tiempo_trans_por_simulacion+total_de_tiempo_cola_por_simulacion), "\n")
-    cat("C2_N2: ", C2_N2_trabajo/(total_c1_destinos+total_c1_rechazo+total_c3_destinos+total_c3_rechazo+C2_N1_trabajo+C2_N2_trabajo+total_de_tiempo_trans_por_simulacion+total_de_tiempo_cola_por_simulacion), "\n")
-    cat("C3: ", (total_c3_destinos+total_c3_rechazo)/(total_c1_destinos+total_c1_rechazo+total_c3_destinos+total_c3_rechazo+C2_N1_trabajo+C2_N2_trabajo+total_de_tiempo_trans_por_simulacion+total_de_tiempo_cola_por_simulacion), "\n")
+    cat("C1: ", (total_c1_destinos+total_c1_rechazo)/tiempoMaximo, "\n")
+    cat("C2_N1: ", C2_N1_trabajo/tiempoMaximo, "\n")
+    cat("C2_N2: ", C2_N2_trabajo/tiempoMaximo, "\n")
+    cat("C3: ", (total_c3_destinos+total_c3_rechazo)/tiempoMaximo, "\n")
 
     print("-----Porcentaje del tiempo ocupacion de procesadores C1 y C3 en msj rechazados-----")
-    cat("C1: ", total_c1_rechazo/(total_c1_destinos+total_c1_rechazo+total_c3_destinos+total_c3_rechazo+C2_N1_trabajo+C2_N2_trabajo+total_de_tiempo_trans_por_simulacion+total_de_tiempo_cola_por_simulacion), "\n")
-    cat("C3: ", total_c3_rechazo/(total_c1_destinos+total_c1_rechazo+total_c3_destinos+total_c3_rechazo+C2_N1_trabajo+C2_N2_trabajo+total_de_tiempo_trans_por_simulacion+total_de_tiempo_cola_por_simulacion), "\n")
+    cat("C1: ", total_c1_rechazo/tiempoMaximo, "\n")
+    cat("C3: ", total_c3_rechazo/tiempoMaximo, "\n")
 
     print("-----Porcentaje de mensajes rechazados-----")
     cat("Porcentaje: ", total_rechazados/(total_rechazados+total_destinos) , "\n")
@@ -196,10 +196,10 @@ simular <- function() {
     total_de_mensajes_general = total_rechazados+total_destinos #Unicamente tomando en cuenta mensajes que salieron del sistema
     total_de_tiempo_trans = total_de_tiempo_trans + total_de_tiempo_trans_por_simulacion #tiempo total de mensaje en el sistema en trans 
     total_de_tiempo_cola = total_de_tiempo_cola + total_de_tiempo_cola_por_simulacion  #tiempo total de mensaje en el sistema en cola
-    total_proc_C1_ocupados = total_proc_ocupados + (total_c1_destinos+total_c1_rechazo)/(total_c1_destinos+total_c1_rechazo+total_c3_destinos+total_c3_rechazo+C2_N1_trabajo+C2_N2_trabajo+total_de_tiempo_trans_por_simulacion+total_de_tiempo_cola_por_simulacion)
-    total_proc_C2N1_ocupados = C2_N1_trabajo/(total_c1_destinos+total_c1_rechazo+total_c3_destinos+total_c3_rechazo+C2_N1_trabajo+C2_N2_trabajo+total_de_tiempo_trans_por_simulacion+total_de_tiempo_cola_por_simulacion)
-    total_proc_C2N2_ocupados = C2_N2_trabajo/(total_c1_destinos+total_c1_rechazo+total_c3_destinos+total_c3_rechazo+C2_N1_trabajo+C2_N2_trabajo+total_de_tiempo_trans_por_simulacion+total_de_tiempo_cola_por_simulacion)
-    total_proc_C3_ocupados = (total_c3_destinos+total_c3_rechazo)/(total_c1_destinos+total_c1_rechazo+total_c3_destinos+total_c3_rechazo+C2_N1_trabajo+C2_N2_trabajo+total_de_tiempo_trans_por_simulacion+total_de_tiempo_cola_por_simulacion)
+    total_proc_C1_ocupados = total_proc_ocupados + ((total_c1_destinos+total_c1_rechazo)/tiempoMaximo)
+    total_proc_C2N1_ocupados = total_proc_C2N1_ocupados + (C2_N1_trabajo/tiempoMaximo)
+    total_proc_C2N2_ocupados = total_proc_C2N2_ocupados + (C2_N2_trabajo/tiempoMaximo)
+    total_proc_C3_ocupados = total_proc_C3_ocupados + ((total_c3_destinos+total_c3_rechazo)/tiempoMaximo)
 
     reiniciar_pos_simulacion() #inicializacion para la siguiente simulacion 
   }
