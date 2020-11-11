@@ -120,7 +120,9 @@ simular <- function() {
   total_proc_C2N2_ocupados = 0
   total_proc_C3_ocupados = 0
 
-  tiemposPromedioPorMensaje <- array(0, dim=c(3,repeticiones,1))
+  tiemposPromedioMensajesAceptados <- array(0, dim=c(1,repeticiones,1))
+  tiemposPromedioMensajesRechazados <- array(0, dim=c(1,repeticiones,1))
+  tiemposPromedioMensajesGeneral <- array(0, dim=c(1,repeticiones,1))
 
   for(i in 1:repeticiones) #el 10 indica cuantas veces quiero que se repita las simulaciones
   {
@@ -165,7 +167,7 @@ simular <- function() {
 
       total_destinos = total_destinos + 1
     }
-    tiemposPromedioPorMensaje[1][i] = (total_de_tiempo_procesado_por_simulacion + total_de_tiempo_cola_por_simulacion + total_de_tiempo_trans_por_simulacion)/total_destinos
+    tiemposPromedioMensajesAceptados[i] = (total_de_tiempo_procesado_por_simulacion + total_de_tiempo_cola_por_simulacion + total_de_tiempo_trans_por_simulacion)/total_destinos
     while(identical(FALSE,cola_msj_rechazados$empty()))
     {
       mensaje = cola_msj_rechazados$pop()
@@ -180,8 +182,8 @@ simular <- function() {
       total_devoluciones = total_devoluciones + mensaje@num_total_devuelto
       total_rechazados = total_rechazados + 1
     }
-    tiemposPromedioPorMensaje[2][i] = (total_de_tiempo_procesado_por_simulacion + total_de_tiempo_cola_por_simulacion + total_de_tiempo_trans_por_simulacion - tiemposPromedioPorMensaje[1][i]*total_destinos)/total_rechazados
-    tiemposPromedioPorMensaje[3][i] = tiemposPromedioPorMensaje[1][i] + tiemposPromedioPorMensaje[2][i]
+    tiemposPromedioMensajesRechazados[i] = (total_de_tiempo_procesado_por_simulacion + total_de_tiempo_cola_por_simulacion + total_de_tiempo_trans_por_simulacion - tiemposPromedioMensajesAceptados[i]*total_destinos)/total_rechazados
+    tiemposPromedioMensajesGeneral[i] = tiemposPromedioMensajesAceptados[i] + tiemposPromedioMensajesRechazados[i]
 
     #Estadisticas por corrida de simulacion
     cat("CORRIDA NUMERO ", i, "\n")
@@ -202,7 +204,7 @@ simular <- function() {
     total_de_mensajes_general = total_rechazados+total_destinos #Unicamente tomando en cuenta mensajes que salieron del sistema
     total_de_tiempo_trans = total_de_tiempo_trans + total_de_tiempo_trans_por_simulacion #tiempo total de mensaje en el sistema en trans 
     total_de_tiempo_cola = total_de_tiempo_cola + total_de_tiempo_cola_por_simulacion  #tiempo total de mensaje en el sistema en cola
-    total_proc_C1_ocupados = total_proc_ocupados + ((total_c1_destinos+total_c1_rechazo)/tiempoMaximo)
+    total_proc_C1_ocupados = total_proc_C1_ocupados + ((total_c1_destinos+total_c1_rechazo)/tiempoMaximo)
     total_proc_C2N1_ocupados = total_proc_C2N1_ocupados + (C2_N1_trabajo/tiempoMaximo)
     total_proc_C2N2_ocupados = total_proc_C2N2_ocupados + (C2_N2_trabajo/tiempoMaximo)
     total_proc_C3_ocupados = total_proc_C3_ocupados + ((total_c3_destinos+total_c3_rechazo)/tiempoMaximo)
@@ -235,11 +237,11 @@ simular <- function() {
   #t_msj_destino <- array(0, dim=c(1,repeticiones,1))
   # asignar según indice i de la repetición
   print("-----Intervalo de confianza para mensajes enviados a su destino-----")
-  intervalo_de_confianza( tiemposPromedioPorMensaje, repeticiones, 0 )
+  intervalo_de_confianza( tiemposPromedioMensajesAceptados, repeticiones )
   print("-----Intervalo de confianza para mensajes rechazados-----")
-  intervalo_de_confianza( tiemposPromedioPorMensaje, repeticiones, 1 )
+  intervalo_de_confianza( tiemposPromedioMensajesRechazados, repeticiones )
   print("-----Intervalo de confianza para mensajes en general-----")
-  intervalo_de_confianza( tiemposPromedioPorMensaje, repeticiones, 2 )
+  intervalo_de_confianza( tiemposPromedioMensajesGeneral, repeticiones )
 }
 
 reiniciar_pos_simulacion <- function() 
@@ -265,23 +267,24 @@ reiniciar_pos_simulacion <- function()
     C2_N2_trabajo <<- 0
 }
 
-intervalo_de_confianza <- function( tiemposPromedioPorMensaje, repeticiones, tipo )
+intervalo_de_confianza <- function( tiemposPromedioPorMensaje, repeticiones )
 {
   acumulador <- 0
   for( i in 1:repeticiones ){
-    acumulador <- acumulador + tiemposPromedioPorMensaje[tipo][i]
+    acumulador <- acumulador + tiemposPromedioPorMensaje[i]
   }
   media_muestral <- acumulador/repeticiones
 
-  #cat("media_muestral: ", media_muestral, "\n")
+  cat("media_muestral: ", media_muestral, "\n")
   varianza_muestral = 0
   # calcular varianza muestral
   for( i in 1:repeticiones ){ # fórmula notable
-      varianza_muestral = varianza_muestral + (tiemposPromedioPorMensaje[tipo][i]-media_muestral)^2
+      varianza_muestral = varianza_muestral + (tiemposPromedioPorMensaje[i]-media_muestral)^2
   }
+  grados_libertad = repeticiones-1
   varianza_muestral = varianza_muestral/grados_libertad
 
-  #cat("varianza_muestral: ", varianza_muestral, "\n")
+  cat("varianza_muestral: ", varianza_muestral, "\n")
   cat("Intervalo: [", media_muestral - 2.26 * (varianza_muestral/repeticiones)^(1/2),", ", media_muestral + 2.26 * (varianza_muestral/repeticiones)^(1/2), "]\n")
 }
 
